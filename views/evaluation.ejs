@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dashboard</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel='stylesheet' href='/stylesheets/bootstrap-3.3.7.min.css' />
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body class="base-bg">
+  <div class="top-wrapper">
+    <div class="container top-panel">
+      <div class="top-left">
+        <h3>IoT-SNN DashBoard</h3>
+        <ul class="top-menu">
+          <li><a href="/">Home</a></li>
+          <li><a href="/evaluation">Evaluation</a></li>
+        </ul>
+      </div>
+      <div class="top-right">
+        <label>2019-11-07 22:01:00</label>
+      </div>
+    </div>
+  </div>
+  <div class="wrapper">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="ibox">
+            <div class="ibox-title">
+              <h5>정량적 평가 항목 지표</h5>
+            </div>
+            <div class="ibox-content">
+              <div id="chart-1" style="height: 480px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/javascripts/jquery-1.12.4.min.js"></script>
+  <script src="/javascripts/bootstrap-3.3.7.min.js"></script>
+  <script src="/javascripts/echart-4.4.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+
+      // Test Data
+      const dataSet = [];
+      const dataSet2 = [];
+      const dataSet3 = [];
+
+      for (let i=1;i<=60;i++) {
+        const r1 = Math.floor(Math.random() * 10) + 10;
+        const r2 = Math.floor(Math.random() * 12) + 10;
+        const r3 = Math.floor(Math.random() * 14) + 10;
+        dataSet.push(r1);
+        dataSet2.push(r2);
+        dataSet3.push(r3);
+      }
+
+      // Chart 1
+      const chart1 = echarts.init(document.getElementById('chart-1'));
+      const chart1_opt = {
+        xAxis: {
+          type: "category",
+          data: null
+        },
+        yAxis: {},
+        series: [{
+          data: dataSet,
+          type: 'line'
+        }, {
+          data: dataSet2,
+          type: 'line'
+        }, {
+          data: dataSet3,
+          type: 'line'
+        }],
+        color: ["#33e69e", "#43a047", "#1b5e20"]
+      };
+      chart1.setOption(chart1_opt);
+
+    });
+  </script>
+  </body>
+</html>

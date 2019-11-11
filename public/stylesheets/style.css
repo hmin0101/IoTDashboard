@@ -1,0 +1,110 @@
+body {
+  padding: 0;
+  font-family: "Open Sans",sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+.base-bg {
+  background-color: #f4f4f4;
+}
+
+.top-wrapper {
+  background-color: #2cc185;
+  color: #fff;
+}
+.top-panel {
+  display: flex;
+  padding: 20px 15px;
+  margin-bottom: 30px;
+}
+.top-panel .top-left,
+.top-panel .top-right {
+  display: flex;
+  flex: 1;
+  align-items: center;
+}
+.top-panel .top-right {
+  flex-direction: row-reverse;
+}
+.top-left h3,
+.top-right label {
+  margin: 0;
+}
+
+.top-menu {
+  margin: 0;
+  list-style: none;
+}
+.top-menu > li {
+  float: left;
+  margin: 0 10px;
+  padding: 0;
+}
+.top-menu > li:first-child {
+  margin-right: 10px;
+}
+.top-menu > li:last-child {
+  margin-left: 10px;
+}
+.top-menu > li > a {
+  text-decoration: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+.ibox,
+.ibox-list {
+  flex: 1;
+  background-color: #fff;
+  margin-bottom: 30px;
+}
+.ibox-title {
+  padding: 5px 15px;
+}
+.ibox-content {
+  padding: 10px 15px 15px 15px;
+}
+.ibox-list .list-item {
+  display: flex;
+  padding: 10px 25px;
+  border-bottom: 1px solid #e4e4e4;
+  align-items: center;
+}
+.item-icon,
+.item-content {
+  flex: 1;
+  margin: 0;
+}
+.item-icon {
+  color: #388e3c;
+}
+.item-subject,
+.item-value {
+  display: block;
+  text-align: right;
+  color: #646464;
+  margin: 0;
+}
+.item-value {
+  text-align: right;
+  color: #646464;
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.538;
+}
+.form-chart .ibox-content {
+  padding: 0;
+}
+
+.flex {
+  display: flex;
+}
+
+@media (min-width: 1380px) {
+  .container {
+    width: 1350px;
+  }
+}
+@media (min-width: 1530px) {
+  .container {
+    width: 1500px;
+  }
+}

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dashboard</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel='stylesheet' href='/stylesheets/bootstrap-3.3.7.min.css' />
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body class="base-bg">
+  <div class="top-wrapper">
+    <div class="container top-panel">
+      <div class="top-left">
+        <h3>IoT-SNN DashBoard</h3>
+        <ul class="top-menu">
+          <li><a href="/">Home</a></li>
+          <li><a href="/evaluation">Evaluation</a></li>
+        </ul>
+      </div>
+      <div class="top-right">
+        <label>2019-11-07 22:01:00</label>
+      </div>
+    </div>
+  </div>
+  <div class="wrapper">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-7">
+          <div class="ibox">
+            <div class="ibox-title">
+              <h5>Tested Map</h5>
+            </div>
+            <div class="ibox-content"></div>
+          </div>
+        </div>
+        <div class="col-sm-5">
+          <div class="row flex">
+            <div class="col-sm-12">
+              <div class="ibox-list">
+                <div class="ibox-list-title">
+                  <select class="form-control">
+                    <option class="option" value="0">선택</option>
+                  </select>
+                </div>
+                <div class="ibox-list-content">
+                  <div class="list-item">
+                    <div class="item-icon"><i class="fa fa-thermometer fa-3x"></i></div>
+                    <div class="item-content">
+                      <span class="item-value"><span id="text-temperature">14.4</span>°C</span>
+                      <small class="item-subject">Temperature</small>
+                    </div>
+                  </div>
+                  <div class="list-item">
+                    <div class="item-icon"><i class="fa fa-thermometer fa-3x"></i></div>
+                    <div class="item-content">
+                      <span class="item-value"><span id="text-humidity">44.4</span></span>
+                      <small class="item-subject">Humidity</small>
+                    </div>
+                  </div>
+                  <div class="list-item">
+                    <div class="item-icon"><i class="fa fa-bar-chart fa-3x"></i></div>
+                    <div class="item-content">
+                      <span class="item-value"><span id="text-pm2.5">45.4</span></span>
+                      <small class="item-subject">pm2.5</small>
+                    </div>
+                  </div>
+                  <div class="list-item">
+                    <div class="item-icon"><i class="fa fa-bar-chart fa-3x"></i></div>
+                    <div class="item-content">
+                      <span class="item-value"><span id="text-pm10.0">23.4</span></span>
+                      <small class="item-subject">pm10.0</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="ibox form-chart">
+            <div class="ibox-title">
+              <h5>주기 조절을 통한 실측값/예측값</h5>
+            </div>
+            <div class="ibox-content">
+              <div id="chart-1" style="height: 480px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/javascripts/jquery-1.12.4.min.js"></script>
+  <script src="/javascripts/bootstrap-3.3.7.min.js"></script>
+  <script src="/javascripts/echart-4.4.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+
+      // Test Data
+      const realDataSet = [];
+      const predictionDataSet = [];
+      for (let i=1;i<=60;i++) {
+        const random = Math.floor(Math.random() * 50) + 1;
+        realDataSet.push([i, random]);
+        predictionDataSet.push([i, random + 3]);
+      }
+
+      // Chart 1
+      const chart1 = echarts.init(document.getElementById('chart-1'));
+      const chart1_opt = {
+        xAxis: {},
+        yAxis: {},
+        legend: {
+          data: ["예측값", "실측값"]
+        },
+        tooltip: {
+          trigger: 'axis',
+          formatter: function (params, ticket, callback) {
+            const d1 = params[0].value[1];
+            const d2 = params[1].value[1];
+            return "예측값 : " + d2 + "<br/>실측값 : " + d1;
+          }
+        },
+        series: [{
+          name: "실측값",
+          symbolSize: 7,
+          data: realDataSet,
+          type: 'scatter'
+        }, {
+          name: "예측값",
+          symbolSize: 7,
+          data: predictionDataSet,
+          type: 'scatter'
+          }],
+        color: ["#388e3c", "#33e69e"]
+      };
+      chart1.setOption(chart1_opt);
+
+    });
+  </script>
+  </body>
+</html>
