@@ -25,73 +25,113 @@
   <div class="wrapper">
     <div class="container">
       <div class="row">
-        <div class="col-sm-7">
-          <div class="ibox">
+        <div class="col-sm-12">
+          <div class="ibox form-chart">
             <div class="ibox-title">
-              <h5>Tested Map</h5>
+              <h5>Temperature</h5>
             </div>
-            <div class="ibox-content"></div>
-          </div>
-        </div>
-        <div class="col-sm-5">
-          <div class="row flex">
-            <div class="col-sm-12">
-              <div class="ibox-list">
-                <div class="ibox-list-title">
-                  <div class="input-group">
-                    <div class="input-group-addon">Select Node</div>
-                    <select class="form-control select-control">
-                      <option class="option" value="0">선택</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="ibox-list-content">
-                  <div class="list-item">
-                    <div class="item-icon"><i class="fa fa-thermometer fa-3x"></i></div>
-                    <div class="item-content">
-                      <span class="item-value"><span id="text-temperature">14.4</span>°C</span>
-                      <small class="item-subject">Temperature</small>
-                    </div>
-                  </div>
-                  <div class="list-item">
-                    <div class="item-icon"><i class="fa fa-thermometer fa-3x"></i></div>
-                    <div class="item-content">
-                      <span class="item-value"><span id="text-humidity">44.4</span></span>
-                      <small class="item-subject">Humidity</small>
-                    </div>
-                  </div>
-                  <div class="list-item">
-                    <div class="item-icon"><i class="fa fa-bar-chart fa-3x"></i></div>
-                    <div class="item-content">
-                      <span class="item-value"><span id="text-pm2.5">45.4</span></span>
-                      <small class="item-subject">pm2.5</small>
-                    </div>
-                  </div>
-                  <div class="list-item">
-                    <div class="item-icon"><i class="fa fa-bar-chart fa-3x"></i></div>
-                    <div class="item-content">
-                      <span class="item-value"><span id="text-pm10.0">23.4</span></span>
-                      <small class="item-subject">pm10.0</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div class="ibox-content" style="padding-bottom: 25px">
+              <div id="chart-temperature" style="height: 440px;"></div>
             </div>
           </div>
         </div>
       </div>
+
       <div class="row">
         <div class="col-sm-12">
           <div class="ibox form-chart">
             <div class="ibox-title">
-              <h5>주기 조절을 통한 실측값/예측값</h5>
+              <h5>Humidity</h5>
             </div>
-            <div class="ibox-content">
-              <div id="chart-1" style="height: 480px;"></div>
+            <div class="ibox-content" style="padding-bottom: 25px">
+              <div id="chart-humidity" style="height: 440px;"></div>
             </div>
           </div>
         </div>
       </div>
+
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="ibox form-chart">
+            <div class="ibox-title">
+              <h5>PM025</h5>
+            </div>
+            <div class="ibox-content" style="padding-bottom: 25px">
+              <div id="chart-pm025" style="height: 440px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+<!--      <div class="row">-->
+<!--        <div class="col-sm-7">-->
+<!--          <div class="ibox">-->
+<!--            <div class="ibox-title">-->
+<!--              <h5>Tested Map</h5>-->
+<!--            </div>-->
+<!--            <div class="ibox-content"></div>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--        <div class="col-sm-5">-->
+<!--          <div class="row flex">-->
+<!--            <div class="col-sm-12">-->
+<!--              <div class="ibox-list">-->
+<!--                <div class="ibox-list-title">-->
+<!--                  <div class="input-group">-->
+<!--                    <div class="input-group-addon">Select Node</div>-->
+<!--                    <select class="form-control select-control">-->
+<!--                      <option class="option" value="0">선택</option>-->
+<!--                    </select>-->
+<!--                  </div>-->
+<!--                </div>-->
+<!--                <div class="ibox-list-content">-->
+<!--                  <div class="list-item">-->
+<!--                    <div class="item-icon"><i class="fa fa-thermometer fa-3x"></i></div>-->
+<!--                    <div class="item-content">-->
+<!--                      <span class="item-value"><span id="text-temperature">14.4</span>°C</span>-->
+<!--                      <small class="item-subject">Temperature</small>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                  <div class="list-item">-->
+<!--                    <div class="item-icon"><i class="fa fa-thermometer fa-3x"></i></div>-->
+<!--                    <div class="item-content">-->
+<!--                      <span class="item-value"><span id="text-humidity">44.4</span></span>-->
+<!--                      <small class="item-subject">Humidity</small>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                  <div class="list-item">-->
+<!--                    <div class="item-icon"><i class="fa fa-bar-chart fa-3x"></i></div>-->
+<!--                    <div class="item-content">-->
+<!--                      <span class="item-value"><span id="text-pm2.5">45.4</span></span>-->
+<!--                      <small class="item-subject">pm2.5</small>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                  <div class="list-item">-->
+<!--                    <div class="item-icon"><i class="fa fa-bar-chart fa-3x"></i></div>-->
+<!--                    <div class="item-content">-->
+<!--                      <span class="item-value"><span id="text-pm10.0">23.4</span></span>-->
+<!--                      <small class="item-subject">pm10.0</small>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <div class="row">-->
+<!--        <div class="col-sm-12">-->
+<!--          <div class="ibox form-chart">-->
+<!--            <div class="ibox-title">-->
+<!--              <h5>주기 조절을 통한 실측값/예측값</h5>-->
+<!--            </div>-->
+<!--            <div class="ibox-content">-->
+<!--              <div id="chart-1" style="height: 480px;"></div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+
     </div>
   </div>
 
@@ -99,47 +139,162 @@
   <script src="/javascripts/bootstrap-3.3.7.min.js"></script>
   <script src="/javascripts/echart-4.4.0.min.js"></script>
   <script>
+    let loopTh, loopPm;
+
     $(document).ready(function() {
 
-      // Test Data
-      const realDataSet = [];
-      const predictionDataSet = [];
-      for (let i=1;i<=60;i++) {
-        const random = Math.floor(Math.random() * 50) + 1;
-        realDataSet.push([i, random]);
-        predictionDataSet.push([i, random + 3]);
-      }
+      // Data
+      const tempData = JSON.parse('<%- tempData %>');
+      const humidityData = JSON.parse('<%- humidityData %>');
+      const pm025Data = JSON.parse('<%- pm025Data %>');
+      const legend_th = tempData.map(function(elem) {
+        return elem.name;
+      });
+      const legend_pm = [];
+      tempData.forEach(function(elem) {
+        if (elem.name !== "Node50" && elem.name !== "Node51" && elem.name !== "Node52") {
+          legend_pm.push(elem.name);
+        }
+      });
 
-      // Chart 1
-      const chart1 = echarts.init(document.getElementById('chart-1'));
-      const chart1_opt = {
-        xAxis: {},
-        yAxis: {},
+      // Temperature
+      const chartTemp = echarts.init(document.getElementById("chart-temperature"));
+      const chartTemp_opt = {
+        xAxis: [{
+          type: "time"
+        }],
+        yAxis: [{
+          type: "value",
+          scale: true,
+        }],
         legend: {
-          data: ["예측값", "실측값"]
+          padding: [0, 100, 0, 100],
+          textStyle: {
+            fontSize: 11,
+          },
+          data: legend_th
         },
         tooltip: {
           trigger: 'axis',
+          axisPointer: {
+            type: "cross"
+          },
+          padding: [10, 20],
           formatter: function (params, ticket, callback) {
-            const d1 = params[0].value[1];
-            const d2 = params[1].value[1];
-            return "예측값 : " + d2 + "<br/>실측값 : " + d1;
+            // const date = new Date(params[0].value[0]);
+            // const dateStr = date.getFullYear() + "/" + ((date.getMonth() + 1) > 9 ? date.getMonth() + 1 : "0"+(date.getMonth()+1)) + "/" + (date.getDate() > 9 ? date.getDate() : "0"+date.getDate()) + " " +
+            //         (date.getHours() > 9 ? date.getHours() : "0"+date.getHours()) + ":" + (date.getMinutes() > 9 ? date.getMinutes() : "0"+date.getMinutes());
+            return "Node41 : " + params[0].value[1] + "<br/>Node42 : " + params[1].value[1] +"<br/>Node42 : " + params[2].value[1] +"<br/>Node43 : " + params[3].value[1] + "<br/>Node44 : " + params[4].value[1] +
+                    "<br/>Node45 : " + params[5].value[1] + "<br/>Node51 : " + params[6].value[1] + "<br/>Node52 : " + params[7].value[1] + "<br/>Node61 : " + params[8].value[1] + "<br/>Node62 : " + params[9].value[1] +
+                    "<br/>Node63 : " + params[10].value[1] + "<br/>Node64 : " + params[11].value[1] + "<br/>Node65 : " + params[12].value[1] + "<br/>Node66 : " + params[13].value[1];
           }
         },
-        series: [{
-          name: "실측값",
-          symbolSize: 7,
-          data: realDataSet,
-          type: 'scatter'
-        }, {
-          name: "예측값",
-          symbolSize: 7,
-          data: predictionDataSet,
-          type: 'scatter'
-          }],
-        color: ["#388e3c", "#33e69e"]
+        dataZoom: [{
+          type: 'slider',
+          start: 0,
+          end: 100
+        }],
+        series: tempData,
+        // color: ["#388e3c", "#33e69e"]
       };
-      chart1.setOption(chart1_opt);
+      chartTemp.setOption(chartTemp_opt);
+
+      // Humidity
+      const chartHumidity = echarts.init(document.getElementById("chart-humidity"));
+      const chartHumidity_opt = {
+        xAxis: [{
+          type: "time"
+        }],
+        yAxis: [{
+          type: "value",
+          scale: true,
+        }],
+        legend: {
+          padding: [0, 100, 0, 100],
+          textStyle: {
+            fontSize: 11,
+          },
+          data: legend_th
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: "cross"
+          },
+          padding: [10, 20],
+          formatter: function (params, ticket, callback) {
+            return "Node41 : " + params[0].value[1] + "<br/>Node42 : " + params[1].value[1] +"<br/>Node42 : " + params[2].value[1] +"<br/>Node43 : " + params[3].value[1] + "<br/>Node44 : " + params[4].value[1] +
+                    "<br/>Node45 : " + params[5].value[1] + "<br/>Node51 : " + params[6].value[1] + "<br/>Node52 : " + params[7].value[1] + "<br/>Node61 : " + params[8].value[1] + "<br/>Node62 : " + params[9].value[1] +
+                    "<br/>Node63 : " + params[10].value[1] + "<br/>Node64 : " + params[11].value[1] + "<br/>Node65 : " + params[12].value[1] + "<br/>Node66 : " + params[13].value[1];
+          }
+        },
+        dataZoom: [{
+          type: 'slider',
+          start: 0,
+          end: 100
+        }],
+        series: humidityData,
+        // color: ["#388e3c", "#33e69e"]
+      };
+      chartHumidity.setOption(chartHumidity_opt);
+
+      // PM025
+      const chartPm025 = echarts.init(document.getElementById("chart-pm025"));
+      const chartPm025_opt = {
+        xAxis: [{
+          type: "time"
+        }],
+        yAxis: [{
+          type: "value",
+          scale: true,
+        }],
+        legend: {
+          padding: [0, 100, 0, 100],
+          textStyle: {
+            fontSize: 11,
+          },
+          data: legend_pm
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: "cross"
+          },
+          padding: [10, 20],
+          formatter: function (params, ticket, callback) {
+            return Object.keys(params[2].value);
+            // const date = new Date(params[0].value[0]);
+            // const dateStr = date.getFullYear() + "/" + ((date.getMonth() + 1) > 9 ? date.getMonth() + 1 : "0"+(date.getMonth()+1)) + "/" + (date.getDate() > 9 ? date.getDate() : "0"+date.getDate()) + " " +
+            //         (date.getHours() > 9 ? date.getHours() : "0"+date.getHours()) + ":" + (date.getMinutes() > 9 ? date.getMinutes() : "0"+date.getMinutes());
+            //
+            // return dateStr + "<br/>Node41 : " + params[0].value[1] + "<br/>Node42 : " + params[1].value[1] +"<br/>Node42 : " + params[2].value[1] +"<br/>Node43 : " + params[3].value[1] + "<br/>Node44 : " + params[4].value[1] +
+            //         "<br/>Node45 : " + params[5].value[1] + "<br/>Node51 : " + params[6].value[1] + "<br/>Node52 : " + params[7].value[1] + "<br/>Node61 : " + params[8].value[1] + "<br/>Node62 : " + params[9].value[1] +
+            //         "<br/>Node63 : " + params[10].value[1] + "<br/>Node64 : " + params[11].value[1] + "<br/>Node65 : " + params[12].value[1] + "<br/>Node66 : " + params[13].value[1];
+          }
+        },
+        dataZoom: [{
+          type: 'slider',
+          start: 0,
+          end: 100
+        }],
+        series: pm025Data,
+        // color: ["#388e3c", "#33e69e"]
+      };
+      chartPm025.setOption(chartPm025_opt);
+
+      // Loop
+      loopTh = setInterval(function() {
+        $.get("/next/th", function(result) {
+          chartTemp.setOption({ series: result.tempList });
+          chartHumidity.setOption({ series: result.humidityList });
+        });
+      }, 30000);
+
+      loopPm = setInterval(function() {
+        $.get("/next/pm", function(result) {
+          chartPm025.setOption({ series: result.pm025List });
+        })
+      }, 10000);
 
     });
   </script>

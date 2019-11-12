@@ -28,10 +28,10 @@
         <div class="col-sm-12">
           <div class="ibox">
             <div class="ibox-title">
-              <h5>정량적 평가 항목 지표</h5>
+              <h5>Sensor Period Control</h5>
             </div>
             <div class="ibox-content">
-              <div id="chart-1" style="height: 480px;"></div>
+              <div id="chart-1" style="height: 410px;"></div>
             </div>
           </div>
         </div>
@@ -43,43 +43,34 @@
   <script src="/javascripts/bootstrap-3.3.7.min.js"></script>
   <script src="/javascripts/echart-4.4.0.min.js"></script>
   <script>
+    let loop = null;
+
     $(document).ready(function() {
 
-      // Test Data
-      const dataSet = [];
-      const dataSet2 = [];
-      const dataSet3 = [];
+      // Data
+      const series = JSON.parse('<%- series %>');
+      console.log(series);
 
-      for (let i=1;i<=60;i++) {
-        const r1 = Math.floor(Math.random() * 10) + 10;
-        const r2 = Math.floor(Math.random() * 12) + 10;
-        const r3 = Math.floor(Math.random() * 14) + 10;
-        dataSet.push(r1);
-        dataSet2.push(r2);
-        dataSet3.push(r3);
-      }
-
-      // Chart 1
-      const chart1 = echarts.init(document.getElementById('chart-1'));
-      const chart1_opt = {
-        xAxis: {
-          type: "category",
+      // Chart
+      const chartPc = echarts.init(document.getElementById('chart-1'));
+      const chartPc_opt = {
+        xAxis: [{
+          type: "time",
           data: null
-        },
-        yAxis: {},
-        series: [{
-          data: dataSet,
-          type: 'line'
-        }, {
-          data: dataSet2,
-          type: 'line'
-        }, {
-          data: dataSet3,
-          type: 'line'
         }],
-        color: ["#33e69e", "#43a047", "#1b5e20"]
+        yAxis: [{
+
+        }],
+        series: series,
+        color: ["#33e69e", "#33e69e", "#33e69e", "#33e69e", "#1b5e20", "#1b5e20", "#1b5e20", "#1b5e20"]
       };
-      chart1.setOption(chart1_opt);
+      chartPc.setOption(chartPc_opt);
+
+      loop = setInterval(function() {
+        $.get("/next/pc", function(result) {
+          chartPc.setOption({ series: result.series });
+        })
+      }, 10000);
 
     });
   </script>
