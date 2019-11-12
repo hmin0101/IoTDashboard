@@ -14,11 +14,13 @@
         <h3>IoT-SNN DashBoard</h3>
         <ul class="top-menu">
           <li><a href="/">Dashboard</a></li>
-          <li><a href="/evaluation">Evaluation</a></li>
+          <li><a href="/spc">Sensor Period Control</a></li>
         </ul>
       </div>
       <div class="top-right">
-        <label>2019-11-07 22:01:00</label>
+        <% const date = new Date(); %>
+        <% const dateStr = date.getFullYear() + "-" + ((date.getMonth() + 1) > 9 ? date.getMonth() + 1 : "0"+(date.getMonth()+1)) + "-" + (date.getDate() > 9 ? date.getDate() : "0"+date.getDate()) + " " + (date.getHours() > 9 ? date.getHours() : "0"+date.getHours()) + ":" + (date.getMinutes() > 9 ? date.getMinutes() : "0"+date.getMinutes()); %>
+        <label id="currentTime"><%= dateStr %></label>
       </div>
     </div>
   </div>

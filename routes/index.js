@@ -3,6 +3,8 @@ const router = express.Router();
 
 const query = require('../model/query');
 
+const initTime = Date.now();
+
 const TH_C = 60;
 const PM_C = 360;
 
@@ -22,7 +24,7 @@ router.get('/', async function(req, res, next) {
   const result = await query.getNodeList();
   if (result.result) {
     nodeList = result.list;
-    const dataResult = await query.getTHData(offset_th, nodeList);
+    const dataResult = await query.getTHData(offset_th, nodeList, initTime);
     if (dataResult.result) {
       thDataList = dataResult.list;
 
@@ -137,13 +139,13 @@ router.get('/next/pm', async function(req, res) {
 
 });
 
-router.get('/evaluation', async function(req, res) {
+router.get('/spc', async function(req, res) {
 
   let series = [];
   const result = await query.getPeriodControlData();
   if (result.result) {
     pcDataList = result.list;
-    offset_pc = 60;
+    offset_pc += 1;
 
     series = [{
       name: "Temperature",
@@ -187,32 +189,35 @@ router.get('/evaluation', async function(req, res) {
     }]
   }
 
-  res.render('evaluation', {series: JSON.stringify(series)});
+  res.render('sensor_period_control', {series: JSON.stringify(series)});
 
 });
 
-router.get('/next/pc', async function(req, res) {
+router.get('/next/spc', async function(req, res) {
 
   let series = [];
-  const result = await query.getNextPeriodControlData(offset_pc);
+  const result = await query.getNextPeriodControlData(TH_C + offset_pc);
   if (result.result) {
     offset_pc += 1;
 
-    pcDataList.t.shift();
+    if (pcDataList.length > 1) {
+      pcDataList.t.shift();
+      pcDataList.h.shift();
+      pcDataList.pm025.shift();
+      pcDataList.pm100.shift();
+      pcDataList.p_t.shift();
+      pcDataList.p_h.shift();
+      pcDataList.p_pm025.shift();
+      pcDataList.p_pm100.shift();
+
+    }
     pcDataList.t.push(result.data.t);
-    pcDataList.h.shift();
     pcDataList.h.push(result.data.h);
-    pcDataList.pm025.shift();
     pcDataList.pm025.push(result.data.pm025);
-    pcDataList.pm100.shift();
     pcDataList.pm100.push(result.data.pm100);
-    pcDataList.p_t.shift();
     pcDataList.p_t.push(result.data.p_t);
-    pcDataList.p_h.shift();
     pcDataList.p_h.push(result.data.p_h);
-    pcDataList.p_pm025.shift();
     pcDataList.p_pm025.push(result.data.p_pm025);
-    pcDataList.p_pm100.shift();
     pcDataList.p_pm100.push(result.data.p_pm100);
 
     series = [{

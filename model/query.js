@@ -1,4 +1,5 @@
 const db = require('../db/db_query');
+const moment = require('moment');
 
 module.exports = {
 
@@ -25,7 +26,7 @@ module.exports = {
         }
     },
 
-    getTHData: async function(offset, list) {
+    getTHData: async function(offset, list, initTime) {
         try {
             const dataList = [];
             const nodeCount = list.length;
@@ -189,14 +190,14 @@ module.exports = {
             const selectResult = await db.asyncSelect(selectQ);
             if (selectResult.result) {
                 for (const elem of selectResult.message) {
-                    data.t = [elem.time, elem.t];
-                    data.h = [elem.time, elem.h];
+                    data.t = [elem.time, elem.temperature];
+                    data.h = [elem.time, elem.humidity];
                     data.pm025 = [elem.time, elem.pm025];
                     data.pm100 = [elem.time, elem.pm100];
 
                     if (elem.p_t === null) {
-                        data.p_t = [elem.time, elem.t];
-                        data.p_h = [elem.time, elem.h];
+                        data.p_t = [elem.time, elem.temperature];
+                        data.p_h = [elem.time, elem.humidity];
                         data.p_pm025 = [elem.time, elem.pm025];
                         data.p_pm100 = [elem.time, elem.pm100];
                     } else {
