@@ -15,7 +15,11 @@ body {
   padding: 20px 15px;
   margin-bottom: 30px;
 }
-.top-panel .top-left,
+.top-panel .top-left {
+  display: flex;
+  flex: 3;
+  align-items: center;
+}
 .top-panel .top-right {
   display: flex;
   flex: 1;

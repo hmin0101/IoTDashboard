@@ -266,4 +266,10 @@ router.get('/next/spc', async function(req, res) {
 
 });
 
+router.get('/testbed', async function(req, res) {
+
+  res.render('testbed');
+
+});
+
 module.exports = router;

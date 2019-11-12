@@ -15,7 +15,7 @@
         <ul class="top-menu">
           <li><a href="/">Dashboard</a></li>
           <li><a href="/spc">Sensor Period Control</a></li>
-          <li><a href="/testbed">Testbed configuration</a></li>
+          <li><a href="/testbed">Testbed Configuration</a></li>
         </ul>
       </div>
       <div class="top-right">
@@ -31,7 +31,7 @@
         <div class="col-sm-12">
           <div class="ibox">
             <div class="ibox-title">
-              <h5>Sensor Period Control</h5>
+              <h5>Testbed Configuration</h5>
             </div>
             <div class="ibox-content">
               <div id="chart-1" style="height: 410px;"></div>
@@ -46,61 +46,9 @@
   <script src="/javascripts/bootstrap-3.3.7.min.js"></script>
   <script src="/javascripts/echart-4.4.0.min.js"></script>
   <script>
-    let loop = null;
-
     $(document).ready(function() {
 
-      // Data
-      const series = JSON.parse('<%- series %>');
-      const legend = series.map(function(elem) {
-        return elem.name;
-      });
-      console.log(series);
 
-      // Chart
-      const chartPc = echarts.init(document.getElementById('chart-1'));
-      const chartPc_opt = {
-        xAxis: [{
-          type: "time",
-          data: null
-        }],
-        yAxis: [{
-          type: "value",
-          scale: true,
-        }],
-        legend: {
-          padding: [0, 100, 0, 100],
-          textStyle: {
-            fontSize: 11,
-          },
-          data: legend
-        },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: "cross"
-          },
-          padding: [10, 20],
-          formatter: function (params, ticket, callback) {
-            return "t : " + params[0].value[1] + " | p_t : " + params[4].value[1] +"<br/>h : " + params[1].value[1] +" | p_h : " + params[5].value[1] + "<br/>pm025 : " + params[2].value[1] +
-                    " | p_pm025 : " + params[6].value[1] + "<br/>pm100 : " + params[3].value[1] + " | p_pm100 : " + params[7].value[1];
-          }
-        },
-        dataZoom: [{
-          type: 'slider',
-          start: 0,
-          end: 100
-        }],
-        series: series,
-        color: ["#1b5e20", "#1b5e20", "#1b5e20", "#1b5e20", "#33e69e", "#33e69e", "#33e69e", "#33e69e"]
-      };
-      chartPc.setOption(chartPc_opt);
-
-      loop = setInterval(function() {
-        $.get("/next/pc", function(result) {
-          chartPc.setOption({ series: result.series });
-        })
-      }, 10000);
 
     });
   </script>
