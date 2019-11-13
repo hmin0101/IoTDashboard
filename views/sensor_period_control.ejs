@@ -19,9 +19,8 @@
         </ul>
       </div>
       <div class="top-right">
-        <% const date = new Date(); %>
-        <% const dateStr = date.getFullYear() + "-" + ((date.getMonth() + 1) > 9 ? date.getMonth() + 1 : "0"+(date.getMonth()+1)) + "-" + (date.getDate() > 9 ? date.getDate() : "0"+date.getDate()) + " " + (date.getHours() > 9 ? date.getHours() : "0"+date.getHours()) + ":" + (date.getMinutes() > 9 ? date.getMinutes() : "0"+date.getMinutes()); %>
-        <label id="currentTime"><%= dateStr %></label>
+        <label id="btn-reset" style="margin-left: 15px; cursor: pointer;">Reset</label>
+        <label id="currentTime"><%= recentlyTime %></label>
       </div>
     </div>
   </div>
@@ -31,10 +30,36 @@
         <div class="col-sm-12">
           <div class="ibox">
             <div class="ibox-title">
-              <h5>Sensor Period Control</h5>
+              <h5>Sensor Period Control<br/><small>(Temperature and Humidity)</small></h5>
             </div>
             <div class="ibox-content">
-              <div id="chart-1" style="height: 410px;"></div>
+              <div id="chart-th" style="height: 410px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="ibox">
+            <div class="ibox-title">
+              <h5>Sensor Period Control<br/><small>(에너지 절감)</small></h5>
+            </div>
+            <div class="ibox-content">
+              <div id="chart-energy" style="height: 410px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="ibox">
+            <div class="ibox-title">
+              <h5>Sensor Period Control<br/><small>(pm025 and pm100)</small></h5>
+            </div>
+            <div class="ibox-content">
+              <div id="chart-pm" style="height: 410px;"></div>
             </div>
           </div>
         </div>
@@ -50,16 +75,78 @@
 
     $(document).ready(function() {
 
+      // Reset
+      $('#btn-reset').on('click', function(e) {
+        e.preventDefault();
+        $.ajax({
+          type: "POST",
+          url: "/reset",
+          success: function(result) {
+            if (result.result) {
+              alert("초기화 완료");
+              window.location.reload();
+            }
+          }
+        });
+      });
+
       // Data
-      const series = JSON.parse('<%- series %>');
-      const legend = series.map(function(elem) {
+      const series_th = JSON.parse('<%- series_th %>');
+      const series_pm = JSON.parse('<%- series_pm %>');
+      const legend_th = series_th.map(function(elem) {
         return elem.name;
       });
-      console.log(series);
+      const legend_pm = series_pm.map(function(elem) {
+        return elem.name;
+      });
 
-      // Chart
-      const chartPc = echarts.init(document.getElementById('chart-1'));
-      const chartPc_opt = {
+      // Chart TH
+      const chartTH = echarts.init(document.getElementById('chart-th'));
+      const chartTH_opt = {
+        xAxis: [{
+          type: "time",
+          data: null
+        }],
+        yAxis: [{
+          type: "value",
+          name: "Temp",
+          scale: true
+        }, {
+          type: "value",
+          name: "Humidity",
+          min: 0,
+          max: 100
+        }],
+        legend: {
+          padding: [0, 100, 0, 100],
+          textStyle: {
+            fontSize: 11,
+          },
+          data: legend_th
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: "cross"
+          },
+          padding: [10, 20],
+          formatter: function (params, ticket, callback) {
+            return "t : " + params[0].value[1];
+          }
+        },
+        dataZoom: [{
+          type: 'slider',
+          start: 0,
+          end: 100
+        }],
+        series: series_th,
+        color: ["#000000", "#000000", "#ff0000", "#ff0000"]
+      };
+      chartTH.setOption(chartTH_opt);
+
+      // Chart PM
+      const chartPM = echarts.init(document.getElementById('chart-pm'));
+      const chartPM_opt = {
         xAxis: [{
           type: "time",
           data: null
@@ -73,7 +160,7 @@
           textStyle: {
             fontSize: 11,
           },
-          data: legend
+          data: legend_pm
         },
         tooltip: {
           trigger: 'axis',
@@ -82,8 +169,7 @@
           },
           padding: [10, 20],
           formatter: function (params, ticket, callback) {
-            return "t : " + params[0].value[1] + " | p_t : " + params[4].value[1] +"<br/>h : " + params[1].value[1] +" | p_h : " + params[5].value[1] + "<br/>pm025 : " + params[2].value[1] +
-                    " | p_pm025 : " + params[6].value[1] + "<br/>pm100 : " + params[3].value[1] + " | p_pm100 : " + params[7].value[1];
+            return "t : " + params[0].value[1];
           }
         },
         dataZoom: [{
@@ -91,15 +177,19 @@
           start: 0,
           end: 100
         }],
-        series: series,
-        color: ["#1b5e20", "#1b5e20", "#1b5e20", "#1b5e20", "#33e69e", "#33e69e", "#33e69e", "#33e69e"]
+        series: series_pm,
+        color: ["#000000", "#000000", "#ff0000", "#ff0000"]
       };
-      chartPc.setOption(chartPc_opt);
+      chartPM.setOption(chartPM_opt);
 
       loop = setInterval(function() {
         $.get("/next/spc", function(result) {
-          chartPc.setOption({ series: result.series });
-        })
+          chartTH.setOption({ series: result.series });
+        });
+        $.get("/next/spc", function(result) {
+          chartPM.setOption({ series: result.series });
+        });
+        $('#currentTime').text(result.recentlyTime);
       }, 10000);
 
     });

@@ -19,9 +19,8 @@
         </ul>
       </div>
       <div class="top-right">
-        <% const date = new Date(); %>
-        <% const dateStr = date.getFullYear() + "-" + ((date.getMonth() + 1) > 9 ? date.getMonth() + 1 : "0"+(date.getMonth()+1)) + "-" + (date.getDate() > 9 ? date.getDate() : "0"+date.getDate()) + " " + (date.getHours() > 9 ? date.getHours() : "0"+date.getHours()) + ":" + (date.getMinutes() > 9 ? date.getMinutes() : "0"+date.getMinutes()); %>
-        <label id="currentTime"><%= dateStr %></label>
+        <label id="btn-reset" style="margin-left: 15px; cursor: pointer;">Reset</label>
+        <label id="currentTime"><%= recentlyTime %></label>
       </div>
     </div>
   </div>
@@ -142,9 +141,24 @@
   <script src="/javascripts/bootstrap-3.3.7.min.js"></script>
   <script src="/javascripts/echart-4.4.0.min.js"></script>
   <script>
-    let loopTh, loopPm;
+    let loop;
 
     $(document).ready(function() {
+
+      // Reset
+      $('#btn-reset').on('click', function(e) {
+        e.preventDefault();
+        $.ajax({
+          type: "POST",
+          url: "/reset",
+          success: function(result) {
+            if (result.result) {
+              alert("초기화 완료");
+              window.location.reload();
+            }
+          }
+        });
+      });
 
       // Data
       const tempData = JSON.parse('<%- tempData %>');
@@ -211,7 +225,8 @@
         }],
         yAxis: [{
           type: "value",
-          scale: true,
+          min: 0,
+          max: 100
         }],
         legend: {
           padding: [0, 100, 0, 100],
@@ -289,17 +304,16 @@
       chartPm025.setOption(chartPm025_opt);
 
       // Loop
-      loopTh = setInterval(function() {
+      loop = setInterval(function() {
         $.get("/next/th", function(result) {
           chartTemp.setOption({ series: result.tempList });
           chartHumidity.setOption({ series: result.humidityList });
+          $('#currentTime').text(result.recentlyTime);
         });
-      }, 30000);
 
-      loopPm = setInterval(function() {
         $.get("/next/pm", function(result) {
           chartPm025.setOption({ series: result.pm025List });
-        })
+        });
       }, 10000);
 
     });

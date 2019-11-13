@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const moment = require('moment');
 
 const query = require('../model/query');
 
 const initTime = Date.now();
 
-const BASIC_DATA_SIZE = 60;
+const BASIC_DATA_SIZE = 360;
 const PM_DATA_SIZE = 360;
 
 let nodeList = [];
@@ -21,6 +22,7 @@ router.get('/', async function(req, res, next) {
   let humidityList = [];
   let pm025List = [];
 
+  let recentlyTime = moment().format('YYYY-MM-DD hh:mm');
   const result = await query.getNodeList();
   if (result.result) {
     nodeList = result.list;
@@ -28,7 +30,11 @@ router.get('/', async function(req, res, next) {
     if (dataResult.result) {
       thDataList = dataResult.list;
 
-      tempList = thDataList.map(function(elem) {
+      tempList = thDataList.map(function(elem, index) {
+        if (index === thDataList.length - 1) {
+          recentlyTime = moment(elem.t[elem.t.length - 1][0]).format('YYYY-MM-DD hh:mm');
+        }
+
         return {
           name: "Node"+elem.id,
           type: "line",
@@ -57,17 +63,20 @@ router.get('/', async function(req, res, next) {
       });
     }
 
-    res.render('dashboard', {tempData: JSON.stringify(tempList), humidityData: JSON.stringify(humidityList), pm025Data: JSON.stringify(pm025List)});
+    res.render('dashboard', {recentlyTime: recentlyTime, tempData: JSON.stringify(tempList), humidityData: JSON.stringify(humidityList), pm025Data: JSON.stringify(pm025List)});
   } else {
-    res.render('dashboard', {tempData: JSON.stringify([]), humidityData: JSON.stringify([]), pm025Data: JSON.stringify([])});
+    res.render('dashboard', {recentlyTime: recentlyTime, tempData: JSON.stringify([]), humidityData: JSON.stringify([]), pm025Data: JSON.stringify([])});
   }
 
 });
 
 router.get('/next/th', async function(req, res) {
 
+  let recentlyTime = moment().format('YYYY-MM-DD hh:mm');
   const result = await query.getNextTHData(BASIC_DATA_SIZE + offset_th, nodeList.length);
   if (result.result) {
+    recentlyTime = moment(result.message[0].time).format('YYYY-MM-DD hh:mm');
+
     for (const d of result.message) {
       for (const node of thDataList) {
         if (node.id === d.id) {
@@ -97,18 +106,22 @@ router.get('/next/th', async function(req, res) {
     });
 
     offset_th += 1;
+    offset_pc = offset_th;
 
-    await res.json({tempList: tempList, humidityList: humidityList});
+    await res.json({recentlyTime: recentlyTime, tempList: tempList, humidityList: humidityList});
   } else {
-    await res.json({tempList: [], humidityList: []});
+    await res.json({recentlyTime: moment().format('YYYY-MM-DD hh:mm'), tempList: [], humidityList: []});
   }
 
 });
 
 router.get('/next/pm', async function(req, res) {
 
+  let recentlyTime = moment().format('YYYY-MM-DD hh:mm');
   const result = await query.getNextPmData(PM_DATA_SIZE + offset_pm, nodeList.length);
   if (result.result) {
+    recentlyTime = moment(result.message[0].time).format('YYYY-MM-DD hh:mm');
+
     for (const d of result.message) {
       for (const node of pmDataList) {
         if (node.id === d.id) {
@@ -128,21 +141,23 @@ router.get('/next/pm', async function(req, res) {
 
     offset_pm += 1;
 
-    await res.json({pm025List: pm025List});
+    await res.json({recentlyTime: recentlyTime, pm025List: pm025List});
   } else {
-    await res.json({pm025List: []});
+    await res.json({recentlyTime: recentlyTime, pm025List: []});
   }
 
 });
 
 router.get('/spc', async function(req, res) {
 
-  let series = [];
+  let series_th = [], series_pm = [];
+  let recentlyTime = moment().format('YYYY-MM-DD hh:mm');
   const result = await query.getPeriodControlData(offset_pc);
   if (result.result) {
     pcDataList = result.list;
+    recentlyTime = moment(pcDataList.t[pcDataList.t.length - 1][0]).format('YYYY-MM-DD hh:mm');
 
-    series = [{
+    series_th = [{
       name: "Temperature",
       type: "line",
       data: pcDataList.t
@@ -153,6 +168,17 @@ router.get('/spc', async function(req, res) {
       data: pcDataList.h
     },
     {
+      name: "Predict Temperature",
+      type: "line",
+      data: pcDataList.p_t
+    },
+    {
+      name: "Predict Humidity",
+      type: "line",
+      data: pcDataList.p_h
+    }];
+
+    series_pm = [{
       name: "pm025",
       type: "line",
       data: pcDataList.pm025
@@ -163,16 +189,6 @@ router.get('/spc', async function(req, res) {
       data: pcDataList.pm100
     },
     {
-      name: "Predict Temperature",
-      type: "line",
-      data: pcDataList.p_t
-    },
-    {
-      name: "Predict Humidity",
-      type: "line",
-      data: pcDataList.p_h
-    },
-    {
       name: "Predict PM025",
       type: "line",
       data: pcDataList.p_pm025
@@ -181,19 +197,23 @@ router.get('/spc', async function(req, res) {
       name: "Predict PM100",
       type: "line",
       data: pcDataList.p_pm100
-    }]
+    }];
   }
 
-  res.render('sensor_period_control', {series: JSON.stringify(series)});
+  res.render('sensor_period_control', {recentlyTime: recentlyTime, series_th: JSON.stringify(series_th), series_pm: JSON.stringify(series_pm)});
 
 });
 
 router.get('/next/spc', async function(req, res) {
 
-  let series = [];
+  let series_th = [], series_pm = [];
+  let recentlyTime = moment().format('YYYY-MM-DD hh:mm');
   const result = await query.getNextPeriodControlData(BASIC_DATA_SIZE + offset_pc);
   if (result.result) {
+    recentlyTime = moment(pcDataList.t[pcDataList.t.length - 1][0]).format('YYYY-MM-DD hh:mm');
     offset_pc += 1;
+    offset_th = offset_pc;
+    offset_pm = offset_pc;
 
     if (pcDataList.t !== undefined) {
       pcDataList.t.shift();
@@ -215,54 +235,65 @@ router.get('/next/spc', async function(req, res) {
       pcDataList.p_pm100.push(result.data.p_pm100);
     }
 
-    series = [{
+    series_th = [{
       name: "Temperature",
       type: "line",
       data: pcDataList.t
     },
-      {
-        name: "Humidity",
-        type: "line",
-        data: pcDataList.h
-      },
-      {
-        name: "pm025",
-        type: "line",
-        data: pcDataList.pm025
-      },
-      {
-        name: "pm100",
-        type: "line",
-        data: pcDataList.pm100
-      },
-      {
-        name: "Predict Temperature",
-        type: "line",
-        data: pcDataList.p_t
-      },
-      {
-        name: "Predict Humidity",
-        type: "line",
-        data: pcDataList.p_h
-      },
-      {
-        name: "Predict PM025",
-        type: "line",
-        data: pcDataList.p_pm025
-      },
-      {
-        name: "Predict PM100",
-        type: "line",
-        data: pcDataList.p_pm100
-      }]
+    {
+      name: "Humidity",
+      type: "line",
+      data: pcDataList.h
+    },
+    {
+      name: "Predict Temperature",
+      type: "line",
+      data: pcDataList.p_t
+    },
+    {
+      name: "Predict Humidity",
+      type: "line",
+      data: pcDataList.p_h
+    }];
+
+    series_pm = [{
+      name: "pm025",
+      type: "line",
+      data: pcDataList.pm025
+    },
+    {
+      name: "pm100",
+      type: "line",
+      data: pcDataList.pm100
+    },
+    {
+      name: "Predict PM025",
+      type: "line",
+      data: pcDataList.p_pm025
+    },
+    {
+      name: "Predict PM100",
+      type: "line",
+      data: pcDataList.p_pm100
+    }];
   }
 
-  await res.json({series: series});
+  await res.json({recentlyTime: recentlyTime, series_th: series_th, series_pm: series_pm});
 });
 
-router.get('/testbed', async function(req, res) {
+router.get('/testbed', function(req, res) {
 
   res.render('testbed');
+
+});
+
+router.post('/reset', function(req, res) {
+
+  offset_th = 0;
+  offset_pm = 0;
+  offset_pc = 0;
+
+  res.json({result: true});
 
 });
 

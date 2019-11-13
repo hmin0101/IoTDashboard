@@ -31,7 +31,7 @@ module.exports = {
             const dataList = [];
             const nodeCount = list.length;
 
-            const selectQ = 'select time, id, temperature, humidity from data_table order by time ASC limit ' + (nodeCount * 60) + ' offset ' + (offset * nodeCount);
+            const selectQ = 'select time, id, temperature, humidity from data_table order by time ASC limit ' + (nodeCount * 360) + ' offset ' + (offset * nodeCount);
             const selectResult = await db.asyncSelect(selectQ);
             if (selectResult.result) {
                 for(const elem of list) {
@@ -143,7 +143,7 @@ module.exports = {
                 p_pm100: []
             };
 
-            const selectQ = 'select time, temperature, humidity, pm025, pm100, p_t, p_h, p_pm025, p_pm100, period from data_table where id=43 order by time ASC limit 60 offset ' + offset;
+            const selectQ = 'select time, temperature, humidity, pm025, pm100, p_t, p_h, p_pm025, p_pm100, period from data_table where id=43 order by time ASC limit 360 offset ' + offset;
             const selectResult = await db.asyncSelect(selectQ);
             if (selectResult.result) {
                 for (const elem of selectResult.message) {
