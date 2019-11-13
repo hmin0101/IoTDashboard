@@ -97,7 +97,7 @@
       chartPc.setOption(chartPc_opt);
 
       loop = setInterval(function() {
-        $.get("/next/pc", function(result) {
+        $.get("/next/spc", function(result) {
           chartPc.setOption({ series: result.series });
         })
       }, 10000);

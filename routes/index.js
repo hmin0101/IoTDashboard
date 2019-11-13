@@ -5,8 +5,8 @@ const query = require('../model/query');
 
 const initTime = Date.now();
 
-const TH_C = 60;
-const PM_C = 360;
+const BASIC_DATA_SIZE = 60;
+const PM_DATA_SIZE = 360;
 
 let nodeList = [];
 let thDataList = [];
@@ -43,8 +43,6 @@ router.get('/', async function(req, res, next) {
           data: elem.h
         }
       });
-
-      offset_th += 1;
     }
 
     const result2 = await query.getPm025(offset_pm, nodeList);
@@ -57,8 +55,6 @@ router.get('/', async function(req, res, next) {
           data: elem.pm025
         }
       });
-
-      offset_pm += 1;
     }
 
     res.render('dashboard', {tempData: JSON.stringify(tempList), humidityData: JSON.stringify(humidityList), pm025Data: JSON.stringify(pm025List)});
@@ -70,7 +66,7 @@ router.get('/', async function(req, res, next) {
 
 router.get('/next/th', async function(req, res) {
 
-  const result = await query.getNextTHData(TH_C + offset_th, nodeList.length);
+  const result = await query.getNextTHData(BASIC_DATA_SIZE + offset_th, nodeList.length);
   if (result.result) {
     for (const d of result.message) {
       for (const node of thDataList) {
@@ -111,7 +107,7 @@ router.get('/next/th', async function(req, res) {
 
 router.get('/next/pm', async function(req, res) {
 
-  const result = await query.getNextPmData(PM_C + offset_pm, nodeList.length);
+  const result = await query.getNextPmData(PM_DATA_SIZE + offset_pm, nodeList.length);
   if (result.result) {
     for (const d of result.message) {
       for (const node of pmDataList) {
@@ -142,10 +138,9 @@ router.get('/next/pm', async function(req, res) {
 router.get('/spc', async function(req, res) {
 
   let series = [];
-  const result = await query.getPeriodControlData();
+  const result = await query.getPeriodControlData(offset_pc);
   if (result.result) {
     pcDataList = result.list;
-    offset_pc += 1;
 
     series = [{
       name: "Temperature",
@@ -196,11 +191,11 @@ router.get('/spc', async function(req, res) {
 router.get('/next/spc', async function(req, res) {
 
   let series = [];
-  const result = await query.getNextPeriodControlData(TH_C + offset_pc);
+  const result = await query.getNextPeriodControlData(BASIC_DATA_SIZE + offset_pc);
   if (result.result) {
     offset_pc += 1;
 
-    if (pcDataList.length > 1) {
+    if (pcDataList.t !== undefined) {
       pcDataList.t.shift();
       pcDataList.h.shift();
       pcDataList.pm025.shift();
@@ -210,15 +205,15 @@ router.get('/next/spc', async function(req, res) {
       pcDataList.p_pm025.shift();
       pcDataList.p_pm100.shift();
 
+      pcDataList.t.push(result.data.t);
+      pcDataList.h.push(result.data.h);
+      pcDataList.pm025.push(result.data.pm025);
+      pcDataList.pm100.push(result.data.pm100);
+      pcDataList.p_t.push(result.data.p_t);
+      pcDataList.p_h.push(result.data.p_h);
+      pcDataList.p_pm025.push(result.data.p_pm025);
+      pcDataList.p_pm100.push(result.data.p_pm100);
     }
-    pcDataList.t.push(result.data.t);
-    pcDataList.h.push(result.data.h);
-    pcDataList.pm025.push(result.data.pm025);
-    pcDataList.pm100.push(result.data.pm100);
-    pcDataList.p_t.push(result.data.p_t);
-    pcDataList.p_h.push(result.data.p_h);
-    pcDataList.p_pm025.push(result.data.p_pm025);
-    pcDataList.p_pm100.push(result.data.p_pm100);
 
     series = [{
       name: "Temperature",
@@ -263,7 +258,6 @@ router.get('/next/spc', async function(req, res) {
   }
 
   await res.json({series: series});
-
 });
 
 router.get('/testbed', async function(req, res) {

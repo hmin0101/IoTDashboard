@@ -130,7 +130,7 @@ module.exports = {
         }
     },
 
-    getPeriodControlData: async function() {
+    getPeriodControlData: async function(offset) {
         try {
             const data = {
                 t: [],
@@ -143,7 +143,7 @@ module.exports = {
                 p_pm100: []
             };
 
-            const selectQ = 'select time, temperature, humidity, pm025, pm100, p_t, p_h, p_pm025, p_pm100, period from data_table where id=43 order by time ASC limit 60' ;
+            const selectQ = 'select time, temperature, humidity, pm025, pm100, p_t, p_h, p_pm025, p_pm100, period from data_table where id=43 order by time ASC limit 60 offset ' + offset;
             const selectResult = await db.asyncSelect(selectQ);
             if (selectResult.result) {
                 for (const elem of selectResult.message) {
