@@ -1,6 +1,8 @@
 const db = require('../db/db_query');
 const moment = require('moment');
 
+const DATA_SIZE = 120;
+
 module.exports = {
 
     getNodeList: async function() {
@@ -31,7 +33,7 @@ module.exports = {
             const dataList = [];
             const nodeCount = list.length;
 
-            const selectQ = 'select time, id, temperature, humidity from data_table order by time ASC limit ' + (nodeCount * 360) + ' offset ' + (offset * nodeCount);
+            const selectQ = 'select time, id, temperature, humidity from data_table order by time ASC limit ' + (nodeCount * DATA_SIZE) + ' offset ' + (offset * nodeCount);
             const selectResult = await db.asyncSelect(selectQ);
             if (selectResult.result) {
                 for(const elem of list) {
@@ -86,7 +88,7 @@ module.exports = {
             const dataList = [];
             const nodeCount = list.length;
 
-            const selectQ = 'select time, id, pm025 from data_table where id not in (50, 51, 52) order by time ASC limit ' + ((nodeCount - 3) * 360) + ' offset ' + (offset * (nodeCount - 3));
+            const selectQ = 'select time, id, pm025 from data_table where id not in (50, 51, 52) order by time ASC limit ' + ((nodeCount - 3) * DATA_SIZE) + ' offset ' + (offset * (nodeCount - 3));
             const selectResult = await db.asyncSelect(selectQ);
             if (selectResult.result) {
                 for(const elem of list) {
@@ -140,10 +142,11 @@ module.exports = {
                 p_t: [],
                 p_h: [],
                 p_pm025: [],
-                p_pm100: []
+                p_pm100: [],
+                prr: []
             };
 
-            const selectQ = 'select time, temperature, humidity, pm025, pm100, p_t, p_h, p_pm025, p_pm100, period from data_table where id=43 order by time ASC limit 360 offset ' + offset;
+            const selectQ = 'select time, temperature, humidity, pm025, pm100, p_t, p_h, p_pm025, p_pm100, period, power_reduction_ratio from data_table where id=43 order by time ASC limit ' + DATA_SIZE + ' offset ' + offset;
             const selectResult = await db.asyncSelect(selectQ);
             if (selectResult.result) {
                 for (const elem of selectResult.message) {
@@ -151,6 +154,7 @@ module.exports = {
                     data.h.push([elem.time, elem.humidity]);
                     data.pm025.push([elem.time, elem.pm025]);
                     data.pm100.push([elem.time, elem.pm100]);
+                    data.prr.push([elem.time, elem.power_reduction_ratio]);
 
                     if (elem.p_t === null) {
                         data.p_t.push([elem.time, elem.temperature]);
@@ -164,6 +168,7 @@ module.exports = {
                         data.p_pm100.push([elem.time, elem.p_pm100]);
                     }
                 }
+
                 return {result: true, list: data};
             } else {
                 return selectResult;
@@ -184,9 +189,10 @@ module.exports = {
                 p_h: null,
                 p_pm025: null,
                 p_pm100: null,
+                prr: null
             };
 
-            const selectQ = 'select time, temperature, humidity, pm025, pm100, p_t, p_h, p_pm025, p_pm100, period from data_table where id=43 order by time ASC limit 1 offset ' + offset;
+            const selectQ = 'select time, temperature, humidity, pm025, pm100, p_t, p_h, p_pm025, p_pm100, period, power_reduction_ratio from data_table where id=43 order by time ASC limit 1 offset ' + offset;
             const selectResult = await db.asyncSelect(selectQ);
             if (selectResult.result) {
                 for (const elem of selectResult.message) {
@@ -194,6 +200,7 @@ module.exports = {
                     data.h = [elem.time, elem.humidity];
                     data.pm025 = [elem.time, elem.pm025];
                     data.pm100 = [elem.time, elem.pm100];
+                    data.prr = [elem.time, elem.power_reduction_ratio];
 
                     if (elem.p_t === null) {
                         data.p_t = [elem.time, elem.temperature];

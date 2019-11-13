@@ -46,7 +46,7 @@
               <h5>Sensor Period Control<br/><small>(에너지 절감)</small></h5>
             </div>
             <div class="ibox-content">
-              <div id="chart-energy" style="height: 410px;"></div>
+              <div id="chart-prr" style="height: 410px;"></div>
             </div>
           </div>
         </div>
@@ -92,8 +92,12 @@
 
       // Data
       const series_th = JSON.parse('<%- series_th %>');
+      const series_prr = JSON.parse('<%- series_prr %>');
       const series_pm = JSON.parse('<%- series_pm %>');
       const legend_th = series_th.map(function(elem) {
+        return elem.name;
+      });
+      const legend_prr = series_pm.map(function(elem) {
         return elem.name;
       });
       const legend_pm = series_pm.map(function(elem) {
@@ -131,7 +135,7 @@
           },
           padding: [10, 20],
           formatter: function (params, ticket, callback) {
-            return "t : " + params[0].value[1];
+            return "temp : " + params[0].value[1] + "<br/>predict temp : " + params[2].value[1] + "<br/><br/>humidity : " + params[1].value[1] + "<br/>predict humidity : " + params[3].value[1];
           }
         },
         dataZoom: [{
@@ -143,6 +147,44 @@
         color: ["#000000", "#000000", "#ff0000", "#ff0000"]
       };
       chartTH.setOption(chartTH_opt);
+
+      // Chart Power Reduction Ratio
+      const chartPrr = echarts.init(document.getElementById('chart-prr'));
+      const chartPrr_opt = {
+        xAxis: [{
+          type: "time",
+          data: null
+        }],
+        yAxis: [{
+          type: "value",
+          scale: true,
+        }],
+        legend: {
+          padding: [0, 100, 0, 100],
+          textStyle: {
+            fontSize: 11,
+          },
+          data: legend_prr
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: "cross"
+          },
+          padding: [10, 20],
+          formatter: function (params, ticket, callback) {
+            return "Ratio : " + params[0].value[1];
+          }
+        },
+        dataZoom: [{
+          type: 'slider',
+          start: 0,
+          end: 100
+        }],
+        series: series_prr,
+        color: ["#2CC185"]
+      };
+      chartPrr.setOption(chartPrr_opt);
 
       // Chart PM
       const chartPM = echarts.init(document.getElementById('chart-pm'));
@@ -169,7 +211,7 @@
           },
           padding: [10, 20],
           formatter: function (params, ticket, callback) {
-            return "t : " + params[0].value[1];
+            return "pm025 : " + params[0].value[1] + "<br/>p_pm025 : " + params[2].value[1] + "<br/><br/>pm100 : " + params[1].value[1] + "<br/>p_pm100 : " + params[3].value[1];
           }
         },
         dataZoom: [{
@@ -184,12 +226,11 @@
 
       loop = setInterval(function() {
         $.get("/next/spc", function(result) {
-          chartTH.setOption({ series: result.series });
+          chartTH.setOption({ series: result.series_th });
+          chartPrr.setOption({ series: result.series_prr });
+          chartPM.setOption({ series: result.series_pm });
+          $('#currentTime').text(result.recentlyTime);
         });
-        $.get("/next/spc", function(result) {
-          chartPM.setOption({ series: result.series });
-        });
-        $('#currentTime').text(result.recentlyTime);
       }, 10000);
 
     });

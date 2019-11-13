@@ -6,14 +6,23 @@ const query = require('../model/query');
 
 const initTime = Date.now();
 
-const BASIC_DATA_SIZE = 360;
-const PM_DATA_SIZE = 360;
+const DATA_SIZE = 120;
 
 let nodeList = [];
 let thDataList = [];
-let pmDataList = [];
+let pmDataList = {
+  t: [],
+  h: [],
+  pm025: [],
+  pm100: [],
+  p_t: [],
+  p_h: [],
+  p_pm025: [],
+  p_pm100: [],
+  prr: []
+};
 let pcDataList = [];
-let offset_th = 0, offset_pm = 0, offset_pc = 0;
+let offset_th = 0, offset_pm = 0, offset_spc = 0;
 
 /* GET home page. */
 router.get('/', async function(req, res, next) {
@@ -73,9 +82,11 @@ router.get('/', async function(req, res, next) {
 router.get('/next/th', async function(req, res) {
 
   let recentlyTime = moment().format('YYYY-MM-DD hh:mm');
-  const result = await query.getNextTHData(BASIC_DATA_SIZE + offset_th, nodeList.length);
+  const result = await query.getNextTHData(DATA_SIZE + offset_th, nodeList.length);
   if (result.result) {
-    recentlyTime = moment(result.message[0].time).format('YYYY-MM-DD hh:mm');
+    if (result.message[0].time !== undefined) {
+      recentlyTime = moment(result.message[0].time).format('YYYY-MM-DD hh:mm');
+    }
 
     for (const d of result.message) {
       for (const node of thDataList) {
@@ -106,7 +117,7 @@ router.get('/next/th', async function(req, res) {
     });
 
     offset_th += 1;
-    offset_pc = offset_th;
+    offset_spc = offset_th;
 
     await res.json({recentlyTime: recentlyTime, tempList: tempList, humidityList: humidityList});
   } else {
@@ -118,7 +129,7 @@ router.get('/next/th', async function(req, res) {
 router.get('/next/pm', async function(req, res) {
 
   let recentlyTime = moment().format('YYYY-MM-DD hh:mm');
-  const result = await query.getNextPmData(PM_DATA_SIZE + offset_pm, nodeList.length);
+  const result = await query.getNextPmData(DATA_SIZE + offset_pm, nodeList.length);
   if (result.result) {
     recentlyTime = moment(result.message[0].time).format('YYYY-MM-DD hh:mm');
 
@@ -150,9 +161,9 @@ router.get('/next/pm', async function(req, res) {
 
 router.get('/spc', async function(req, res) {
 
-  let series_th = [], series_pm = [];
+  let series_th = [], series_pm = [], series_prr = [];
   let recentlyTime = moment().format('YYYY-MM-DD hh:mm');
-  const result = await query.getPeriodControlData(offset_pc);
+  const result = await query.getPeriodControlData(offset_spc);
   if (result.result) {
     pcDataList = result.list;
     recentlyTime = moment(pcDataList.t[pcDataList.t.length - 1][0]).format('YYYY-MM-DD hh:mm');
@@ -198,22 +209,32 @@ router.get('/spc', async function(req, res) {
       type: "line",
       data: pcDataList.p_pm100
     }];
+
+    series_prr = [{
+      name: "Power Reduction Ratio",
+      type: "line",
+      data: pcDataList.prr
+    }];
   }
 
-  res.render('sensor_period_control', {recentlyTime: recentlyTime, series_th: JSON.stringify(series_th), series_pm: JSON.stringify(series_pm)});
+
+
+  res.render('sensor_period_control', {recentlyTime: recentlyTime, series_th: JSON.stringify(series_th), series_pm: JSON.stringify(series_pm), series_prr: JSON.stringify(series_prr)});
 
 });
 
 router.get('/next/spc', async function(req, res) {
 
-  let series_th = [], series_pm = [];
+  let series_th = [], series_pm = [], series_prr = [];
   let recentlyTime = moment().format('YYYY-MM-DD hh:mm');
-  const result = await query.getNextPeriodControlData(BASIC_DATA_SIZE + offset_pc);
+  const result = await query.getNextPeriodControlData(DATA_SIZE + offset_spc);
   if (result.result) {
-    recentlyTime = moment(pcDataList.t[pcDataList.t.length - 1][0]).format('YYYY-MM-DD hh:mm');
-    offset_pc += 1;
-    offset_th = offset_pc;
-    offset_pm = offset_pc;
+    console.log(result.data.t[0]);
+
+    recentlyTime = moment(result.data.t[0]).format('YYYY-MM-DD hh:mm');
+    offset_spc += 1;
+    offset_th = offset_spc;
+    offset_pm = offset_spc;
 
     if (pcDataList.t !== undefined) {
       pcDataList.t.shift();
@@ -224,6 +245,7 @@ router.get('/next/spc', async function(req, res) {
       pcDataList.p_h.shift();
       pcDataList.p_pm025.shift();
       pcDataList.p_pm100.shift();
+      pcDataList.prr.shift();
 
       pcDataList.t.push(result.data.t);
       pcDataList.h.push(result.data.h);
@@ -233,6 +255,7 @@ router.get('/next/spc', async function(req, res) {
       pcDataList.p_h.push(result.data.p_h);
       pcDataList.p_pm025.push(result.data.p_pm025);
       pcDataList.p_pm100.push(result.data.p_pm100);
+      pcDataList.prr.push(result.data.prr);
     }
 
     series_th = [{
@@ -276,9 +299,15 @@ router.get('/next/spc', async function(req, res) {
       type: "line",
       data: pcDataList.p_pm100
     }];
+
+    series_prr = [{
+      name: "Power Reduction Ratio",
+      type: "line",
+      data: pcDataList.prr
+    }];
   }
 
-  await res.json({recentlyTime: recentlyTime, series_th: series_th, series_pm: series_pm});
+  await res.json({recentlyTime: recentlyTime, series_th: series_th, series_pm: series_pm, series_prr: series_prr});
 });
 
 router.get('/testbed', function(req, res) {
@@ -291,7 +320,7 @@ router.post('/reset', function(req, res) {
 
   offset_th = 0;
   offset_pm = 0;
-  offset_pc = 0;
+  offset_spc = 0;
 
   res.json({result: true});
 

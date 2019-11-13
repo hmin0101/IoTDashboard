@@ -282,14 +282,8 @@
           },
           padding: [10, 20],
           formatter: function (params, ticket, callback) {
-            return Object.keys(params[2].value);
-            // const date = new Date(params[0].value[0]);
-            // const dateStr = date.getFullYear() + "/" + ((date.getMonth() + 1) > 9 ? date.getMonth() + 1 : "0"+(date.getMonth()+1)) + "/" + (date.getDate() > 9 ? date.getDate() : "0"+date.getDate()) + " " +
-            //         (date.getHours() > 9 ? date.getHours() : "0"+date.getHours()) + ":" + (date.getMinutes() > 9 ? date.getMinutes() : "0"+date.getMinutes());
-            //
-            // return dateStr + "<br/>Node41 : " + params[0].value[1] + "<br/>Node42 : " + params[1].value[1] +"<br/>Node42 : " + params[2].value[1] +"<br/>Node43 : " + params[3].value[1] + "<br/>Node44 : " + params[4].value[1] +
-            //         "<br/>Node45 : " + params[5].value[1] + "<br/>Node51 : " + params[6].value[1] + "<br/>Node52 : " + params[7].value[1] + "<br/>Node61 : " + params[8].value[1] + "<br/>Node62 : " + params[9].value[1] +
-            //         "<br/>Node63 : " + params[10].value[1] + "<br/>Node64 : " + params[11].value[1] + "<br/>Node65 : " + params[12].value[1] + "<br/>Node66 : " + params[13].value[1];
+            return "Node41 : " + params[0].value[1] + "<br/>Node42 : " + params[1].value[1] +"<br/>Node43 : " + params[2].value[1] +"<br/>Node44 : " + params[3].value[1] + "<br/>Node45 : " + params[4].value[1] +
+                    "<br/>Node61 : " + params[5].value[1] + "<br/>Node62 : " + params[6].value[1] + "<br/>Node63 : " + params[7].value[1] + "<br/>Node64 : " + params[8].value[1] + "<br/>Node65 : " + params[9].value[1] + "<br/>Node66 : " + params[10].value[1];
           }
         },
         dataZoom: [{
