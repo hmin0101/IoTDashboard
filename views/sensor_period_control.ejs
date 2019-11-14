@@ -114,7 +114,7 @@
         yAxis: [{
           type: "value",
           name: "Temp",
-          scale: true
+          // scale: true
         }, {
           type: "value",
           name: "Humidity",
@@ -135,7 +135,7 @@
           },
           padding: [10, 20],
           formatter: function (params, ticket, callback) {
-            return "temp : " + params[0].value[1] + "<br/>predict temp : " + params[2].value[1] + "<br/><br/>humidity : " + params[1].value[1] + "<br/>predict humidity : " + params[3].value[1];
+            return "humidity : " + params[1].value[1] + "<br/>predict humidity : " + params[3].value[1] + "<br/><br/>temp : " + params[0].value[1] + "<br/>predict temp : " + params[2].value[1];
           }
         },
         dataZoom: [{
@@ -211,7 +211,7 @@
           },
           padding: [10, 20],
           formatter: function (params, ticket, callback) {
-            return "pm025 : " + params[0].value[1] + "<br/>p_pm025 : " + params[2].value[1] + "<br/><br/>pm100 : " + params[1].value[1] + "<br/>p_pm100 : " + params[3].value[1];
+            return "pm100 : " + params[1].value[1] + "<br/>p_pm100 : " + params[3].value[1] + "<br/><br/>pm025 : " + params[0].value[1] + "<br/>p_pm025 : " + params[2].value[1];
           }
         },
         dataZoom: [{

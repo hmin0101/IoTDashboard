@@ -176,6 +176,7 @@ router.get('/spc', async function(req, res) {
     {
       name: "Humidity",
       type: "line",
+      yAxisIndex: 1,
       data: pcDataList.h
     },
     {
@@ -186,6 +187,7 @@ router.get('/spc', async function(req, res) {
     {
       name: "Predict Humidity",
       type: "line",
+      yAxisIndex: 1,
       data: pcDataList.p_h
     }];
 
@@ -229,8 +231,6 @@ router.get('/next/spc', async function(req, res) {
   let recentlyTime = moment().format('YYYY-MM-DD hh:mm');
   const result = await query.getNextPeriodControlData(DATA_SIZE + offset_spc);
   if (result.result) {
-    console.log(result.data.t[0]);
-
     recentlyTime = moment(result.data.t[0]).format('YYYY-MM-DD hh:mm');
     offset_spc += 1;
     offset_th = offset_spc;
@@ -266,6 +266,7 @@ router.get('/next/spc', async function(req, res) {
     {
       name: "Humidity",
       type: "line",
+      yAxisIndex: 1,
       data: pcDataList.h
     },
     {
@@ -276,6 +277,7 @@ router.get('/next/spc', async function(req, res) {
     {
       name: "Predict Humidity",
       type: "line",
+      yAxisIndex: 1,
       data: pcDataList.p_h
     }];
 
