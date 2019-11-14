@@ -43,7 +43,7 @@
         <div class="col-sm-12">
           <div class="ibox">
             <div class="ibox-title">
-              <h5>Sensor Period Control<br/><small>(에너지 절감)</small></h5>
+              <h5>Sensor Period Control<br/><small>(Power Reduction Ratio)</small></h5>
             </div>
             <div class="ibox-content">
               <div id="chart-prr" style="height: 410px;"></div>
@@ -97,9 +97,6 @@
       const legend_th = series_th.map(function(elem) {
         return elem.name;
       });
-      const legend_prr = series_pm.map(function(elem) {
-        return elem.name;
-      });
       const legend_pm = series_pm.map(function(elem) {
         return elem.name;
       });
@@ -135,7 +132,7 @@
           },
           padding: [10, 20],
           formatter: function (params, ticket, callback) {
-            return "humidity : " + params[1].value[1] + "<br/>predict humidity : " + params[3].value[1] + "<br/><br/>temp : " + params[0].value[1] + "<br/>predict temp : " + params[2].value[1];
+            return "temp : " + params[0].value[1] + "<br/>predict temp : " + params[2].value[1] + "<br/><br/>humidity : " + params[1].value[1] + "<br/>predict humidity : " + params[3].value[1];
           }
         },
         dataZoom: [{
@@ -156,6 +153,7 @@
           data: null
         }],
         yAxis: [{
+          name: "(%)",
           type: "value",
           scale: true,
         }],
@@ -164,7 +162,7 @@
           textStyle: {
             fontSize: 11,
           },
-          data: legend_prr
+          data: ["Power Reduction Ratio"]
         },
         tooltip: {
           trigger: 'axis',
