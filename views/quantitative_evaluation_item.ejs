@@ -31,10 +31,10 @@
         <div class="col-sm-12">
           <div class="ibox">
             <div class="ibox-title">
-              <h5>Sensor Period Control<br/><small>(Temperature and Humidity)</small></h5>
+              <h5>Quantitative Evaluation Item<br/><small>(실루엣 계수)</small></h5>
             </div>
             <div class="ibox-content">
-              <div id="chart-th" style="height: 410px;"></div>
+              <div id="chart-sc" style="height: 410px;"></div>
             </div>
           </div>
         </div>
@@ -44,7 +44,7 @@
         <div class="col-sm-12">
           <div class="ibox">
             <div class="ibox-title">
-              <h5>Sensor Period Control<br/><small>(Power Reduction Ratio)</small></h5>
+              <h5>Quantitative Evaluation Item<br/><small>(에너지 절감도)</small></h5>
             </div>
             <div class="ibox-content">
               <div id="chart-prr" style="height: 410px;"></div>
@@ -57,20 +57,7 @@
         <div class="col-sm-12">
           <div class="ibox">
             <div class="ibox-title">
-              <h5>Sensor Period Control<br/><small>(pm025 and pm100)</small></h5>
-            </div>
-            <div class="ibox-content">
-              <div id="chart-pm" style="height: 410px;"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-sm-12">
-          <div class="ibox">
-            <div class="ibox-title">
-              <h5>Sensor Period Control<br/><small>(Data Error Rate)</small></h5>
+              <h5>Quantitative Evaluation Item<br/><small>(데이터 신뢰도)</small></h5>
             </div>
             <div class="ibox-content">
               <div id="chart-der" style="height: 410px;"></div>
@@ -106,41 +93,28 @@
       });
 
       // Data
-      const series_th = JSON.parse('<%- thData %>');
-      const series_pm = JSON.parse('<%- pmData %>');
-      const series_prr = JSON.parse('<%- prrData %>');
-      const series_der = JSON.parse('<%- derData %>');
-      console.log(series_prr);
-      // Legend
-      const legend_th = series_th.map(function(elem) {
-        return elem.name;
-      });
-      const legend_pm = series_pm.map(function(elem) {
-        return elem.name;
-      });
+      const scData = JSON.parse('<%- scData %>');
+      const prrData = JSON.parse('<%- prrData %>');
+      const dtData = JSON.parse('<%- dtData %>');
 
-      // Chart TH
-      const chartTH = echarts.init(document.getElementById('chart-th'));
-      const chartTH_opt = {
+      // Chart Silhouette
+      const chartSilhouette = echarts.init(document.getElementById('chart-sc'));
+      const chartSilhouette_opt = {
         xAxis: [{
           type: "time",
           data: null
         }],
         yAxis: [{
+          name: "(%)",
           type: "value",
-          name: "Temp",
-        }, {
-          type: "value",
-          name: "Humidity",
-          min: 0,
-          max: 100
+          scale: true,
         }],
         legend: {
           padding: [0, 100, 0, 100],
           textStyle: {
             fontSize: 11,
           },
-          data: legend_th
+          data: ["실루엣 계수"]
         },
         tooltip: {
           trigger: 'axis',
@@ -149,7 +123,7 @@
           },
           padding: [10, 20],
           formatter: function (params, ticket, callback) {
-            return "temp : " + params[0].value[1] + "<br/>predict temp : " + params[2].value[1] + "<br/><br/>humidity : " + params[1].value[1] + "<br/>predict humidity : " + params[3].value[1];
+            return "Ratio : " + params[0].value[1];
           }
         },
         dataZoom: [{
@@ -157,10 +131,10 @@
           start: 0,
           end: 100
         }],
-        series: series_th,
-        color: ["#bdbdbd", "#bdbdbd", "#d32f2f", "#303f9f"]
+        series: scData,
+        color: ["#546e7a"]
       };
-      chartTH.setOption(chartTH_opt);
+      chartSilhouette.setOption(chartSilhouette_opt);
 
       // Chart Power Reduction Ratio
       const chartPrr = echarts.init(document.getElementById('chart-prr'));
@@ -196,52 +170,14 @@
           start: 0,
           end: 100
         }],
-        series: series_prr,
+        series: prrData,
         color: ["#2CC185"]
       };
       chartPrr.setOption(chartPrr_opt);
 
-      // Chart PM
-      const chartPM = echarts.init(document.getElementById('chart-pm'));
-      const chartPM_opt = {
-        xAxis: [{
-          type: "time",
-          data: null
-        }],
-        yAxis: [{
-          type: "value",
-          scale: true,
-        }],
-        legend: {
-          padding: [0, 100, 0, 100],
-          textStyle: {
-            fontSize: 11,
-          },
-          data: legend_pm
-        },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: "cross"
-          },
-          padding: [10, 20],
-          formatter: function (params, ticket, callback) {
-            return "pm100 : " + params[1].value[1] + "<br/>p_pm100 : " + params[3].value[1] + "<br/><br/>pm025 : " + params[0].value[1] + "<br/>p_pm025 : " + params[2].value[1];
-          }
-        },
-        dataZoom: [{
-          type: 'slider',
-          start: 0,
-          end: 100
-        }],
-        series: series_pm,
-        color: ["#bdbdbd", "#bdbdbd", "#d32f2f", "#303f9f"]
-      };
-      chartPM.setOption(chartPM_opt);
-
-      // Chart Power Reduction Ratio
-      const chartDer = echarts.init(document.getElementById('chart-der'));
-      const chartDer_opt = {
+      // Chart Trust Data
+      const chartDataTrust = echarts.init(document.getElementById('chart-der'));
+      const chartDataTrust_opt = {
         xAxis: [{
           type: "time",
           data: null
@@ -256,7 +192,7 @@
           textStyle: {
             fontSize: 11,
           },
-          data: ["Error Ratio"]
+          data: ["Power Reduction Ratio"]
         },
         tooltip: {
           trigger: 'axis',
@@ -273,17 +209,16 @@
           start: 0,
           end: 100
         }],
-        series: series_der,
-        color: ["#d32f2f"]
+        series: dtData,
+        color: ["#42a5f5"]
       };
-      chartDer.setOption(chartDer_opt);
+      chartDataTrust.setOption(chartDataTrust_opt);
 
       loop = setInterval(function() {
-        $.get("/next/spc", function(result) {
-          chartTH.setOption({ series: result.thData });
+        $.get("/next/qei", function(result) {
+          chartSilhouette.setOption({ series: result.scData });
           chartPrr.setOption({ series: result.prrData });
-          chartPM.setOption({ series: result.humData });
-          chartDer.setOption({ series: result.derData });
+          chartDataTrust.setOption({ series: result.dtData });
 
           $('#currentTime').text(result.recentlyTime);
         });

@@ -15,10 +15,13 @@
         <ul class="top-menu">
           <li><a href="/">Dashboard</a></li>
           <li><a href="/spc">Sensor Period Control</a></li>
+          <li><a href="/qei">Quantitative Evaluation Item</a></li>
           <li><a href="/testbed">Testbed Configuration</a></li>
         </ul>
       </div>
       <div class="top-right">
+        <label id="btn-reset" style="margin-left: 15px; cursor: pointer;">Reset</label>
+        <label id="currentTime"><%= recentlyTime %></label>
       </div>
     </div>
   </div>
@@ -28,10 +31,24 @@
         <div class="col-sm-12">
           <div class="ibox">
             <div class="ibox-title">
+              <h5>Clustering feature map<br/></h5>
+            </div>
+            <div class="ibox-content">
+              <div id="chart-feature" style="height: 410px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="ibox">
+            <div class="ibox-title">
               <h5>Testbed Configuration</h5>
             </div>
-            <div class="ibox-content" style="text-align: center">
-              <img src="/images/testbed_configuration.png">
+            <div class="ibox-content text-center">
+              <canvas id="testbed" width="658" height="633"></canvas>
+              <img class="hidden" id="testbed-background" src="/images/testbed_configuration.png" alt=""/>
             </div>
           </div>
         </div>
@@ -43,9 +60,121 @@
   <script src="/javascripts/bootstrap-3.3.7.min.js"></script>
   <script src="/javascripts/echart-4.4.0.min.js"></script>
   <script>
+    let loop;
+
     $(document).ready(function() {
 
+      // Reset
+      $('#btn-reset').on('click', function(e) {
+        e.preventDefault();
+        $.ajax({
+          type: "POST",
+          url: "/reset",
+          success: function(result) {
+            if (result.result) {
+              alert("초기화 완료");
+              window.location.reload();
+            }
+          }
+        });
+      });
 
+      // Data
+      const featureData = JSON.parse('<%- featureData %>');
+      const testbedData = JSON.parse('<%- testbedData %>');
+      console.log(testbedData);
+
+      // Chart Feature
+      const chartFeature = echarts.init(document.getElementById('chart-feature'));
+      const chartFeature_opt = {
+        xAxis: {},
+        yAxis: {},
+        legend: {},
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: "cross"
+          },
+          padding: [10, 20],
+          formatter: function (params, ticket, callback) {
+            return params[0].value[0] + ", " + params[0].value[1];
+          }
+        },
+        series: featureData,
+        color: ["#f44336", "#9c27b0", "#1e88e5", "#ffc107", "#795548", "#7cb342", "#00bcd4"]
+      };
+      chartFeature.setOption(chartFeature_opt);
+
+      // Draw Testbed
+      const canvas = document.getElementById('testbed')
+      const ctx = canvas.getContext('2d');
+      // Image
+      const img = document.getElementById('testbed-background');
+      ctx.drawImage(img, 0, 0);
+      // set
+      for (const cluster of testbedData) {
+        for (const link of cluster.links) {
+          ctx.beginPath();
+          ctx.strokeStyle = cluster.color;
+          ctx.lineWidth = 3;
+          ctx.moveTo(link.source.x, link.source.y);
+          ctx.lineTo(link.target.x, link.target.y);
+          ctx.stroke();
+          ctx.closePath();
+        }
+      }
+
+
+      // console.log(testbedData);
+      //
+      // // Chart Testbed
+      // const chartTestbed = echarts.init(document.getElementById('chart-testbed'));
+      // const chartTestbed_opt = {
+      //   tooltip: {},
+      //   legend: {},
+      //   graphic: [
+      //     {
+      //       type: 'image',
+      //       left: 'center',
+      //       top: 'middle',
+      //       z: -10,
+      //       bounding: 'raw',
+      //       // origin: [75, 75],
+      //       style: {
+      //         image: 'http://localhost:3000/images/testbed_configuration.png',
+      //         width: 650,
+      //         height: 630,
+      //         opacity: 0.9
+      //       }
+      //     }
+      //   ],
+      //   series: testbedData,
+      // };
+      // chartTestbed.setOption(chartTestbed_opt);
+
+      loop = setInterval(function() {
+        $.get("/next/testbed", function(result) {
+          console.log(result);
+          chartFeature.setOption({ series: result.featureData });
+          //
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0);
+          // set
+          for (const cluster of result.testbedData) {
+            for (const link of cluster.links) {
+              ctx.beginPath();
+              ctx.strokeStyle = cluster.color;
+              ctx.lineWidth = 3;
+              ctx.moveTo(link.source.x, link.source.y);
+              ctx.lineTo(link.target.x, link.target.y);
+              ctx.stroke();
+              ctx.closePath();
+            }
+          }
+
+          $('#currentTime').text(result.recentlyTime);
+        });
+      }, 10000);
 
     });
   </script>

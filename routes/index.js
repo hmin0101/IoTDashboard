@@ -1,328 +1,352 @@
 const express = require('express');
 const router = express.Router();
 const moment = require('moment');
-
+// DB
 const query = require('../model/query');
-
-const initTime = Date.now();
 
 const DATA_SIZE = 120;
 
-let nodeList = [];
-let thDataList = [];
-let pmDataList = {
-  t: [],
-  h: [],
-  pm025: [],
-  pm100: [],
-  p_t: [],
-  p_h: [],
-  p_pm025: [],
-  p_pm100: [],
-  prr: []
+let nodeList = [];                          // Node List
+let recentlyTime;
+let offset = {                              // 시간에 따라 그래프를 변화시키기 위한 offset
+  thpm: 0,
+  spc: 0,
+  qei: 0,
+  tb: 0
 };
-let pcDataList = [];
-let offset_th = 0, offset_pm = 0, offset_spc = 0;
+
+// Init
+(async function () {
+  const result = await query.getNodeList();
+  if (result.result) {
+    nodeList = result.list;
+  }
+})();
 
 /* GET home page. */
 router.get('/', async function(req, res, next) {
 
-  let tempList = [];
-  let humidityList = [];
-  let pm025List = [];
+    let recentlyTime = "Time error";
+    let tempData = [];
+    let humData = [];
+    let pm025Data = [];
+    let pm100Data = [];
 
-  let recentlyTime = moment().format('YYYY-MM-DD hh:mm');
-  const result = await query.getNodeList();
-  if (result.result) {
-    nodeList = result.list;
-    const dataResult = await query.getTHData(offset_th, nodeList, initTime);
-    if (dataResult.result) {
-      thDataList = dataResult.list;
+    const thDataResult = await query.getTHData(offset.thpm, nodeList, DATA_SIZE);
+    if (thDataResult.result) {
+      recentlyTime = moment(new Date(thDataResult.time)).format("YYYY-MM-DD HH:mm");          // 최근 데이터 time 가져오기
 
-      tempList = thDataList.map(function(elem, index) {
-        if (index === thDataList.length - 1) {
-          recentlyTime = moment(elem.t[elem.t.length - 1][0]).format('YYYY-MM-DD hh:mm');
-        }
-
-        return {
-          name: "Node"+elem.id,
-          type: "line",
-          data: elem.t
-        }
+      const nodeList = thDataResult.nodeList;
+      tempData = nodeList.map(function (elem) {         // 온도 그래프 데이터
+        return {name: "Node"+elem.id, type: "line", data: elem.t};
       });
 
-      humidityList = thDataList.map(function(elem) {
-        return {
-          name: "Node"+elem.id,
-          type: "line",
-          data: elem.h
-        }
+      humData = nodeList.map(function (elem) {          // 습도 그래프 데이터
+        return {name: "Node"+elem.id, type: "line", data: elem.h};
       });
     }
 
-    const result2 = await query.getPm025(offset_pm, nodeList);
-    if (result2.result) {
-      pmDataList = result2.list;
-      pm025List = pmDataList.map(function(elem) {
-        return {
-          name: "Node"+elem.id,
-          type: "line",
-          data: elem.pm025
-        }
+    const pmDataResult = await query.getPmData(offset.thpm, nodeList, DATA_SIZE);
+    if (pmDataResult.result) {
+      const nodeList = pmDataResult.nodeList;
+      pm025Data = nodeList.map(function (elem) {         // 온도 그래프 데이터
+        return {name: "Node"+elem.id, type: "line", data: elem.pm025};
+      });
+
+      pm100Data = nodeList.map(function (elem) {          // 습도 그래프 데이터
+        return {name: "Node"+elem.id, type: "line", data: elem.pm100};
       });
     }
 
-    res.render('dashboard', {recentlyTime: recentlyTime, tempData: JSON.stringify(tempList), humidityData: JSON.stringify(humidityList), pm025Data: JSON.stringify(pm025List)});
-  } else {
-    res.render('dashboard', {recentlyTime: recentlyTime, tempData: JSON.stringify([]), humidityData: JSON.stringify([]), pm025Data: JSON.stringify([])});
-  }
+    res.render('dashboard', {recentlyTime: recentlyTime, tempData: JSON.stringify(tempData), humidityData: JSON.stringify(humData), pm025Data: JSON.stringify(pm025Data), pm100Data: JSON.stringify(pm100Data)});
 
 });
 
-router.get('/next/th', async function(req, res) {
+/* DB에 저장된 각 노드의 다음 온도,습도 데이터를 가져오는 API */
+router.get('/next/thpm', async function(req, res) {
 
-  let recentlyTime = moment().format('YYYY-MM-DD hh:mm');
-  const result = await query.getNextTHData(DATA_SIZE + offset_th, nodeList.length);
-  if (result.result) {
-    if (result.message[0].time !== undefined) {
-      recentlyTime = moment(result.message[0].time).format('YYYY-MM-DD hh:mm');
-    }
+  recentlyTime = "Time Error";
+  let tempData = [], humData = [];
+  let pm025Data = [], pm100Data = [];
 
-    for (const d of result.message) {
-      for (const node of thDataList) {
-        if (node.id === d.id) {
-          node.t.shift();
-          node.h.shift();
+  const thDataResult = await query.getTHData(offset.thpm, nodeList, DATA_SIZE);
+  if (thDataResult.result) {
+    recentlyTime = moment(new Date(thDataResult.time)).format("YYYY-MM-DD HH:mm");          // 최근 데이터 time 가져오기
 
-          node.t.push([d.time, d.temperature]);
-          node.h.push([d.time, d.humidity]);
-        }
-      }
-    }
-
-    const tempList = thDataList.map(function(elem) {
-      return {
-        name: "Node"+elem.id,
-        type: "line",
-        data: elem.t
-      }
+    const nodeList = thDataResult.nodeList;
+    tempData = nodeList.map(function (elem) {         // 온도 그래프 데이터
+      return {name: "Node"+elem.id, type: "line", data: elem.t};
     });
 
-    const humidityList = thDataList.map(function(elem) {
-      return {
-        name: "Node"+elem.id,
-        type: "line",
-        data: elem.h
-      }
+    humData = nodeList.map(function (elem) {          // 습도 그래프 데이터
+      return {name: "Node"+elem.id, type: "line", data: elem.h};
     });
-
-    offset_th += 1;
-    offset_spc = offset_th;
-
-    await res.json({recentlyTime: recentlyTime, tempList: tempList, humidityList: humidityList});
-  } else {
-    await res.json({recentlyTime: moment().format('YYYY-MM-DD hh:mm'), tempList: [], humidityList: []});
   }
+
+  const pmDataResult = await query.getPmData(offset.thpm, nodeList, DATA_SIZE);
+  if (pmDataResult.result) {
+    // recentlyTime = moment(new Date(pmDataResult.time)).format("YYYY-MM-DD HH:mm");          // 최근 데이터 time 가져오기
+    const nodeList = pmDataResult.nodeList;
+    pm025Data = nodeList.map(function (elem) {         // PM025 그래프 데이터
+      return {name: "Node"+elem.id, type: "line", data: elem.pm025};
+    });
+
+    pm100Data = nodeList.map(function (elem) {          // PM100 그래프 데이터
+      return {name: "Node"+elem.id, type: "line", data: elem.pm100};
+    });
+  }
+
+  offset.thpm++;
+  offset.spc = offset.thpm;
+  offset.qei = offset.thpm;
+  offset.tb = offset.thpm;
+
+  await res.json({recentlyTime: recentlyTime, tempData: tempData, humData: humData, pm025Data: pm025Data, pm100Data: pm100Data});
 
 });
 
-router.get('/next/pm', async function(req, res) {
-
-  let recentlyTime = moment().format('YYYY-MM-DD hh:mm');
-  const result = await query.getNextPmData(DATA_SIZE + offset_pm, nodeList.length);
-  if (result.result) {
-    recentlyTime = moment(result.message[0].time).format('YYYY-MM-DD hh:mm');
-
-    for (const d of result.message) {
-      for (const node of pmDataList) {
-        if (node.id === d.id) {
-          node.pm025.shift();
-          node.pm025.push([d.time, d.pm025]);
-        }
-      }
-    }
-
-    const pm025List = pmDataList.map(function(elem) {
-      return {
-        name: "Node"+elem.id,
-        type: "line",
-        data: elem.pm025
-      }
-    });
-
-    offset_pm += 1;
-
-    await res.json({recentlyTime: recentlyTime, pm025List: pm025List});
-  } else {
-    await res.json({recentlyTime: recentlyTime, pm025List: []});
-  }
-
-});
-
+/* Sensor Period Control Page */
 router.get('/spc', async function(req, res) {
 
-  let series_th = [], series_pm = [], series_prr = [];
-  let recentlyTime = moment().format('YYYY-MM-DD hh:mm');
-  const result = await query.getPeriodControlData(offset_spc);
-  if (result.result) {
-    pcDataList = result.list;
-    recentlyTime = moment(pcDataList.t[pcDataList.t.length - 1][0]).format('YYYY-MM-DD hh:mm');
+  recentlyTime = "Time error";
+  let thData = [];
+  let pmData = [];
+  let prrData = [];
+  let derData = [];
 
-    series_th = [{
-      name: "Temperature",
-      type: "line",
-      data: pcDataList.t
-    },
-    {
-      name: "Humidity",
-      type: "line",
-      yAxisIndex: 1,
-      data: pcDataList.h
-    },
-    {
-      name: "Predict Temperature",
-      type: "line",
-      data: pcDataList.p_t
-    },
-    {
-      name: "Predict Humidity",
-      type: "line",
-      yAxisIndex: 1,
-      data: pcDataList.p_h
-    }];
+  const thDataResult = await query.getTHData_include_predict(offset.spc, nodeList, DATA_SIZE);
+  if (thDataResult.result) {
+    recentlyTime = moment(new Date(thDataResult.time)).format("YYYY-MM-DD HH:mm");          // 최근 데이터 time 가져오기
 
-    series_pm = [{
-      name: "pm025",
+    thData = [{
+        name: "Temperature",
+        type: "line",
+        smooth: true,
+        yAxisIndex: 0,
+        data: thDataResult.dataList.t
+      }, {
+        name: "Humidity",
+        type: "line",
+        smooth: true,
+        yAxisIndex: 1,
+        data: thDataResult.dataList.h
+      }, {
+        name: "Predict Temperature",
+        type: "line",
+        smooth: true,
+        yAxisIndex: 0,
+        data: thDataResult.dataList.p_t
+      }, {
+        name: "Predict Humidity",
+        type: "line",
+        smooth: true,
+        yAxisIndex: 1,
+        data: thDataResult.dataList.p_h
+      }];
+
+  }
+
+  const pmDataResult = await query.getPMData_include_predict(offset.spc, nodeList, DATA_SIZE);
+  if (pmDataResult.result) {
+    // recentlyTime = moment(new Date(thDataResult.time)).format("YYYY-MM-DD HH:mm");          // 최근 데이터 time 가져오기
+    pmData = [{
+      name: "PM025",
       type: "line",
-      data: pcDataList.pm025
-    },
-    {
-      name: "pm100",
+      data: pmDataResult.dataList.pm025
+    }, {
+      name: "PM100",
       type: "line",
-      data: pcDataList.pm100
-    },
-    {
+      data: pmDataResult.dataList.pm100
+    }, {
       name: "Predict PM025",
       type: "line",
-      data: pcDataList.p_pm025
-    },
-    {
+      data: pmDataResult.dataList.p_pm025
+    }, {
       name: "Predict PM100",
       type: "line",
-      data: pcDataList.p_pm100
-    }];
-
-    series_prr = [{
-      name: "Power Reduction Ratio",
-      type: "line",
-      data: pcDataList.prr
+      data: pmDataResult.dataList.p_pm100
     }];
   }
 
+  const controlResult = await query.getPrrData_derData(offset.spc, DATA_SIZE);
+  if (controlResult.result) {
+    prrData = [{
+      name: "Power Reduction Rate",
+      type: "line",
+      data: controlResult.prrData
+    }];
 
+    derData = [{
+      name: "Data Error Rate",
+      type: "line",
+      data: controlResult.derData
+    }];
+  }
 
-  res.render('sensor_period_control', {recentlyTime: recentlyTime, series_th: JSON.stringify(series_th), series_pm: JSON.stringify(series_pm), series_prr: JSON.stringify(series_prr)});
+  res.render('sensor_period_control', {recentlyTime: recentlyTime, thData: JSON.stringify(thData), pmData: JSON.stringify(pmData), prrData: JSON.stringify(prrData),  derData: JSON.stringify(derData)});
 
 });
 
+/* Sensor Period Page 에서 보여줄 그래프의 다음 데이터들을 가져오는 API */
 router.get('/next/spc', async function(req, res) {
 
-  let series_th = [], series_pm = [], series_prr = [];
-  let recentlyTime = moment().format('YYYY-MM-DD hh:mm');
-  const result = await query.getNextPeriodControlData(DATA_SIZE + offset_spc);
-  if (result.result) {
-    recentlyTime = moment(result.data.t[0]).format('YYYY-MM-DD hh:mm');
-    offset_spc += 1;
-    offset_th = offset_spc;
-    offset_pm = offset_spc;
+  recentlyTime = "Time error";
+  let thData = [];
+  let pmData = [];
+  let prrData = [];
+  let derData = [];
 
-    if (pcDataList.t !== undefined) {
-      pcDataList.t.shift();
-      pcDataList.h.shift();
-      pcDataList.pm025.shift();
-      pcDataList.pm100.shift();
-      pcDataList.p_t.shift();
-      pcDataList.p_h.shift();
-      pcDataList.p_pm025.shift();
-      pcDataList.p_pm100.shift();
-      pcDataList.prr.shift();
+  const thDataResult = await query.getTHData_include_predict(offset.spc, nodeList, DATA_SIZE);
+  if (thDataResult.result) {
+    recentlyTime = moment(new Date(thDataResult.time)).format("YYYY-MM-DD HH:mm");          // 최근 데이터 time 가져오기
 
-      pcDataList.t.push(result.data.t);
-      pcDataList.h.push(result.data.h);
-      pcDataList.pm025.push(result.data.pm025);
-      pcDataList.pm100.push(result.data.pm100);
-      pcDataList.p_t.push(result.data.p_t);
-      pcDataList.p_h.push(result.data.p_h);
-      pcDataList.p_pm025.push(result.data.p_pm025);
-      pcDataList.p_pm100.push(result.data.p_pm100);
-      pcDataList.prr.push(result.data.prr);
-    }
-
-    series_th = [{
+    thData = [{
       name: "Temperature",
       type: "line",
-      data: pcDataList.t
-    },
-    {
+      data: thDataResult.dataList.t
+    }, {
       name: "Humidity",
       type: "line",
-      yAxisIndex: 1,
-      data: pcDataList.h
-    },
-    {
+      data: thDataResult.dataList.h
+    }, {
       name: "Predict Temperature",
       type: "line",
-      data: pcDataList.p_t
-    },
-    {
+      data: thDataResult.dataList.p_t
+    }, {
       name: "Predict Humidity",
       type: "line",
-      yAxisIndex: 1,
-      data: pcDataList.p_h
+      data: thDataResult.dataList.p_h
     }];
 
-    series_pm = [{
-      name: "pm025",
+  }
+
+  const pmDataResult = await query.getPMData_include_predict(offset.spc, nodeList, DATA_SIZE);
+  if (pmDataResult.result) {
+    // recentlyTime = moment(new Date(thDataResult.time)).format("YYYY-MM-DD HH:mm");          // 최근 데이터 time 가져오기
+    pmData = [{
+      name: "PM025",
       type: "line",
-      data: pcDataList.pm025
-    },
-    {
-      name: "pm100",
+      data: pmDataResult.dataList.pm025
+    }, {
+      name: "PM100",
       type: "line",
-      data: pcDataList.pm100
-    },
-    {
+      data: pmDataResult.dataList.pm100
+    }, {
       name: "Predict PM025",
       type: "line",
-      data: pcDataList.p_pm025
-    },
-    {
+      data: pmDataResult.dataList.p_pm025
+    }, {
       name: "Predict PM100",
       type: "line",
-      data: pcDataList.p_pm100
-    }];
-
-    series_prr = [{
-      name: "Power Reduction Ratio",
-      type: "line",
-      data: pcDataList.prr
+      data: pmDataResult.dataList.p_pm100
     }];
   }
 
-  await res.json({recentlyTime: recentlyTime, series_th: series_th, series_pm: series_pm, series_prr: series_prr});
+  const controlResult = await query.getPrrData_derData(offset.spc, DATA_SIZE);
+  if (controlResult.result) {
+    prrData = [{
+      name: "Power Reduction Rate",
+      type: "line",
+      data: controlResult.prrData
+    }];
+
+    derData = [{
+      name: "Data Error Rate",
+      type: "line",
+      data: controlResult.derData
+    }];
+  }
+
+  offset.spc++;
+  offset.thpm = offset.spc;
+  offset.qei = offset.spc;
+  offset.tb = offset.spc;
+
+  await res.json({recentlyTime: recentlyTime, thData: thData, pmData: pmData, prrData: prrData, derData: derData});
+
 });
 
-router.get('/testbed', function(req, res) {
+/* 정량적 평가 항목 지표 */
+router.get('/qei', async function(req, res) {
 
-  res.render('testbed');
+  let scData = [], prrData = [], dtData = [];
+  let recentlyTime = "Time error";
+  const result = await query.getQuantitativeEvaluationItem(offset.qei, DATA_SIZE);
+  if (result.result) {
+    recentlyTime = moment(result.list.sc[result.list.sc.length - 1][0]).format('YYYY-MM-DD HH:mm');
+
+    scData = [{name: "Silhouette Coefficient", type: "line", data: result.list.sc}];
+    prrData = [{name: "Power Reduction Ratio", type: "line", data: result.list.prr}];
+    dtData = [{name: "Data Error Ratio", type: "line", data: result.list.dt}];
+  }
+
+  res.render('quantitative_evaluation_item', {recentlyTime: recentlyTime, scData: JSON.stringify(scData), prrData: JSON.stringify(prrData), dtData: JSON.stringify(dtData)});
+
+});
+
+router.get('/next/qei', async function(req, res) {
+
+  offset.qei++;
+  offset.thpm = offset.qei;
+  offset.spc = offset.qei;
+  offset.tb = offset.qei;
+
+  let scData = [], prrData = [], dtData = [];
+  recentlyTime = "Time error";
+  const result = await query.getQuantitativeEvaluationItem(offset.qei, DATA_SIZE);
+  if (result.result) {
+    recentlyTime = moment(result.list.sc[result.list.sc.length - 1][0]).format('YYYY-MM-DD HH:mm');
+
+    scData = [{name: "Silhouette Coefficient", type: "line", data: result.list.sc}];
+    prrData = [{name: "Power Reduction Ratio", type: "line", data: result.list.prr}];
+    dtData = [{name: "Data Error Ratio", type: "line", data: result.list.dt}];
+  }
+
+  await res.json({recentlyTime: recentlyTime, scData: scData, prrData: prrData, dtData: dtData});
+
+});
+
+router.get('/testbed', async function(req, res) {
+
+  const result = await query.getFeatureData(offset.tb, nodeList.length, DATA_SIZE);
+  if (result.result) {
+    recentlyTime = moment(new Date(result.time)).format("YYYY-MM-DD HH:mm");          // 최근 데이터 time 가져오기
+    res.render('testbed', {recentlyTime: recentlyTime, featureData: JSON.stringify(result.featureData), testbedData: JSON.stringify(result.testbedData)});
+  } else {
+    res.render('testbed', {recentlyTime: recentlyTime, featureData: JSON.stringify([]),  testbedData: JSON.stringify([])});
+  }
+
+});
+
+router.get('/next/testbed', async function(req, res) {
+
+  offset.tb++;
+  offset.thpm = offset.tb;
+  offset.spc = offset.tb;
+  offset.qei = offset.tb;
+
+  const result = await query.getFeatureData(offset.tb, nodeList.length, DATA_SIZE);
+  if (result.result) {
+    recentlyTime = moment(new Date(result.time)).format("YYYY-MM-DD HH:mm");          // 최근 데이터 time 가져오기
+    await res.json({recentlyTime: recentlyTime, featureData: result.featureData, testbedData: result.testbedData});
+  } else {
+    await res.json({recentlyTime: recentlyTime, featureData: [], testbedData: []});
+  }
+
+});
+
+router.get('/testbed/image', function(req, res) {
+
+  res.send("<img src='/images/testbed_configuration.png'></img>");
 
 });
 
 router.post('/reset', function(req, res) {
 
-  offset_th = 0;
-  offset_pm = 0;
-  offset_spc = 0;
+  offset.thpm = 0;
+  offset.spm = 0;
+  offset.qei = 0;
+  offset.tb = 0;
 
   res.json({result: true});
 

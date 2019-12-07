@@ -15,6 +15,7 @@
         <ul class="top-menu">
           <li><a href="/">Dashboard</a></li>
           <li><a href="/spc">Sensor Period Control</a></li>
+          <li><a href="/qei">Quantitative Evaluation Item</a></li>
           <li><a href="/testbed">Testbed Configuration</a></li>
         </ul>
       </div>
@@ -60,6 +61,19 @@
             </div>
             <div class="ibox-content" style="padding-bottom: 25px">
               <div id="chart-pm025" style="height: 440px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="ibox form-chart">
+            <div class="ibox-title">
+              <h5>PM100</h5>
+            </div>
+            <div class="ibox-content" style="padding-bottom: 25px">
+              <div id="chart-pm100" style="height: 440px;"></div>
             </div>
           </div>
         </div>
@@ -164,6 +178,8 @@
       const tempData = JSON.parse('<%- tempData %>');
       const humidityData = JSON.parse('<%- humidityData %>');
       const pm025Data = JSON.parse('<%- pm025Data %>');
+      const pm100Data = JSON.parse('<%- pm100Data %>');
+      // Legend
       const legend_th = tempData.map(function(elem) {
         return elem.name;
       });
@@ -297,16 +313,54 @@
       };
       chartPm025.setOption(chartPm025_opt);
 
+      // PM100
+      const chartPm100 = echarts.init(document.getElementById("chart-pm100"));
+      const chartPm100_opt = {
+        xAxis: [{
+          type: "time"
+        }],
+        yAxis: [{
+          type: "value",
+          scale: true,
+        }],
+        legend: {
+          padding: [0, 100, 0, 100],
+          textStyle: {
+            fontSize: 11,
+          },
+          data: legend_pm
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: "cross"
+          },
+          padding: [10, 20],
+          formatter: function (params, ticket, callback) {
+            return "Node41 : " + params[0].value[1] + "<br/>Node42 : " + params[1].value[1] +"<br/>Node43 : " + params[2].value[1] +"<br/>Node44 : " + params[3].value[1] + "<br/>Node45 : " + params[4].value[1] +
+                    "<br/>Node61 : " + params[5].value[1] + "<br/>Node62 : " + params[6].value[1] + "<br/>Node63 : " + params[7].value[1] + "<br/>Node64 : " + params[8].value[1] + "<br/>Node65 : " + params[9].value[1] + "<br/>Node66 : " + params[10].value[1];
+          }
+        },
+        dataZoom: [{
+          type: 'slider',
+          zoomOnMouseWheel: true,
+          start: 0,
+          end: 100
+        }],
+        series: pm100Data,
+        // color: ["#388e3c", "#33e69e"]
+      };
+      chartPm100.setOption(chartPm100_opt);
+
       // Loop
       loop = setInterval(function() {
-        $.get("/next/th", function(result) {
-          chartTemp.setOption({ series: result.tempList });
-          chartHumidity.setOption({ series: result.humidityList });
-          $('#currentTime').text(result.recentlyTime);
-        });
+        $.get("/next/thpm", function(result) {
+          chartTemp.setOption({ series: result.tempData });
+          chartHumidity.setOption({ series: result.humData });
+          chartPm025.setOption({ series: result.pm025Data });
+          chartPm100.setOption({ series: result.pm100Data });
 
-        $.get("/next/pm", function(result) {
-          chartPm025.setOption({ series: result.pm025List });
+          $('#currentTime').text(result.recentlyTime);
         });
       }, 10000);
 
